@@ -1,5 +1,7 @@
 #include "hex.h"
 
+#include <cassert>
+
 namespace hex {
 
 
