@@ -51,7 +51,8 @@ Edge::next_out(bool reverse) const
 /** Helper function. Offsets p towards the start_point of edge d. */
 Point corner_offset(Point p, Direction d, float bias)
 {
-  Distance dx,dy;
+  Distance dx =0.0;
+  Distance dy =0.0;
   switch(d)
   {
     case A: dx =  I/2.0; dy = -K/2.0; break;

@@ -56,7 +56,7 @@ ostream& operator<<(ostream& os, hex::Point p)
 std::string polyline(
   const std::list<hex::Point>& points,
   const std::string&           col="black",
-  int                          width=1
+  double                          width=1.0
 )
 {
   std::ostringstream ss;
@@ -76,7 +76,7 @@ std::string polyline(
 std::string polylines(
   const std::list<hex::Boundary>& boundaries,
   const std::string&              col="black",
-  int                             width=1
+  double                          width=1.0
 )
 {
   std::string result;
@@ -94,7 +94,7 @@ std::string circle(
   hex::Point          centre,
   hex::Distance       radius,
   const std::string&  col="black",
-  int                 width=1
+  double              width=1.0
 )
 {
   std::ostringstream ss;
@@ -186,9 +186,11 @@ int main()
   set<Hex*> s;
   Hex* h =g.hex(4,4);
   s.insert(h);
-  s.insert(h->go(B));
-//  s.insert(h->go(C));
-//  s.insert(h->go(A));
+  s.insert(h->go(E));
+  s.insert(h->go(C));
+  s.insert(h->go(A));
+  s.insert(h->go(A,2));
+  s.insert(h->go(A,2)->go(B));
   
 
   hex::Area a =s;
@@ -198,8 +200,8 @@ int main()
   cerr<<"b.is_closed: "<<b.is_closed()<<endl;
   cerr<<"b.is_container: "<<b.is_container()<<endl;
  
-  cout<<polyline(b.stroke(-0.1),"red",4)<<endl;
-  cout<<polylines(a.skeleton())<<endl;
+  cout<<polyline(b.stroke(+0.1),"red",4)<<endl;
+  cout<<polylines(g.to_area().skeleton(),"black",0.2)<<endl;
 
   cout<<"</svg>"<<endl;
 
