@@ -70,14 +70,38 @@ std::list<Point>
 Boundary::stroke(float bias) const
 {
   std::list<Point> result;
-  if(!_edges.empty())
+  if(bias==0.0)
   {
-    std::list<Edge*>::const_iterator e =_edges.begin();
-    result.push_back( (**e).start_point(bias) );
-    while(e!=_edges.end())
+    if(!_edges.empty())
     {
-      result.push_back( (**e).end_point(bias) );
-      ++e;
+      std::list<Edge*>::const_iterator e =_edges.begin();
+      result.push_back( (**e).start_point() );
+      while(e!=_edges.end())
+      {
+        result.push_back( (**e).end_point() );
+        ++e;
+      }
+    }
+  }
+  else
+  {
+    Edge* last =NULL;
+    for(std::list<Edge*>::const_iterator e=_edges.begin(); e!=_edges.end(); ++e)
+    {
+      if(last)
+          result.push_back( last->join_point(*e,bias) );
+      last = *e;
+    }
+    if(is_closed())
+    {
+      Point p =last->join_point(_edges.front(),bias);
+      result.push_front( p );
+      result.push_back( p );
+    }
+    else
+    {
+      result.push_front( _edges.front()->start_point(bias) );
+      result.push_back( last->end_point(bias) );
     }
   }
   return result;

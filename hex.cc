@@ -47,9 +47,9 @@ Hex::centre(void) const
 {
   Point result;
   if(_j % 2)
-      result.x = I/2.0 + I * _i;
-  else
-      result.x = I * (1 + _i);
+      result.x = I * (1 + _i); // odd rows
+  else 
+      result.x = I/2.0 + I * _i; // even rows
   result.y = K + J * _j;
   return result;
 }

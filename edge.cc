@@ -1,5 +1,7 @@
 #include "hex.h"
 
+#include <cassert>
+
 namespace hex {
 
 
@@ -46,7 +48,7 @@ Edge::next_out(bool reverse) const
 }
 
 
-/** Helper function. */
+/** Helper function. Offsets p towards the start_point of edge d. */
 Point corner_offset(Point p, Direction d, float bias)
 {
   Distance dx,dy;
@@ -77,6 +79,27 @@ Point
 Edge::end_point(float bias) const
 {
   return corner_offset( _hex->centre(), _direction + 1, bias );
+}
+
+
+Point
+Edge::join_point(const Edge* next, float bias) const
+{
+  if(bias==0.0 || this->_hex==next->_hex)
+  {
+    return end_point(bias);
+  }
+  else
+  {
+#ifdef HEX_PARANOID_CHECKS
+    // The direction is assumed to not be reversed.
+    // ?? Could improve this function to allow for reversed edges,
+    // but for now, we'll just assert that 'next' is indeed next.
+    assert(next == next_out());
+#endif
+    Point p =corner_offset( _hex->centre(), _direction + 2, 0.0 );
+    return corner_offset( p, _direction, bias );
+  }
 }
 
 

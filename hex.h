@@ -59,9 +59,13 @@ class Boundary;
 struct Point
 {
   Distance x,y;
-  Point offset(Distance dx, Distance dy) { return Point(x+=dx,y+=dy); }
+  Point offset(Distance dx, Distance dy) const { return Point(x+dx,y+dy); }
   Point(): x(0.0), y(0.0) {}
   Point(Distance x_, Distance y_): x(x_), y(y_) {}
+  Point operator+(const Point& p) const { return Point(x+p.x,y+p.y); }
+  Point operator-(const Point& p) const { return Point(x-p.x,y-p.y); }
+  Point operator*(double v) const { return Point(x*v,y*v); }
+  Point operator/(double v) const { return Point(x/v,y/v); }
 };
 
 
@@ -102,6 +106,7 @@ public:
   Edge*      next_out(bool reverse=false) const;
   Point      start_point(float bias =0.0) const;
   Point      end_point(float bias =0.0) const;
+  Point      join_point(const Edge* next, float bias =0.0) const;
 private:
   friend class Hex;
   Edge(Hex* h, Direction d): _hex(h), _direction(d) {}

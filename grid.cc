@@ -18,9 +18,9 @@ Grid::hex(Distance x, Distance y) const throw(std::out_of_range)
   int j = lround( (y-K)/J );
   int i;
   if(j % 2)
-      i = lround( (x - I/2.0)/I );
+      i = lround( x/I ) - 1; // odd rows
   else
-      i = lround( x/I ) - 1;
+      i = lround( (x - I/2.0)/I ); // even rows
   return hex(i,j);
 }
 
