@@ -76,23 +76,30 @@ std::set<Hex*>
 range(Hex* h, int distance)
 {
   std::set<Hex*> result;
-  const Grid& grid =h->grid();
-  int i =h->i();
-  int j =h->j();
-
-  try {
-    go(i,j,hex::A,distance); // in/out: i,j
-    result.insert( grid.hex(i,j) );
-  } catch(std::out_of_range&) {}
-
-  for(int d=0; d<DIRECTIONS; ++d)
+  if(distance<1)
   {
-    Direction direction =C+d;
-    for(int count=0; count<distance; ++count)
-        try {
-          go(i,j,direction); // in/out: i,j
-          result.insert( grid.hex(i,j) );
-        } catch(std::out_of_range&) {}
+    result.insert(h);
+  }
+  else
+  {
+    const Grid& grid =h->grid();
+    int i =h->i();
+    int j =h->j();
+  
+    try {
+      go(i,j,hex::A,distance); // in/out: i,j
+      result.insert( grid.hex(i,j) );
+    } catch(std::out_of_range&) {}
+  
+    for(int d=0; d<DIRECTIONS; ++d)
+    {
+      Direction direction =C+d;
+      for(int count=0; count<distance; ++count)
+          try {
+            go(i,j,direction); // in/out: i,j
+            result.insert( grid.hex(i,j) );
+          } catch(std::out_of_range&) {}
+    }
   }
   return result;
 }
