@@ -1,5 +1,7 @@
 #include "hex.h"
 
+#include <cassert>
+
 namespace hex {
 
 
@@ -16,6 +18,21 @@ int
 Path::length(void) const
 {
   return int( _hexes.size() );
+}
+
+
+Path::Path(Hex* start, const std::string& steps) throw(std::out_of_range)
+  : _hexes()
+{
+  _hexes.push_back(start);
+  for(std::string::size_type i=0; i<steps.size(); ++i)
+  {
+    Hex* next =_hexes.back()->go( to_direction(steps[i]) );
+    if(next)
+        _hexes.push_back( next );
+    else
+        throw std::out_of_range("Path");
+  }
 }
 
 

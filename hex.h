@@ -31,6 +31,9 @@ const Distance K =1.0/M_SQRT3;
 enum Direction { A=0,B=1,C=2,D=3,E=4,F=5 };
 const int DIRECTIONS =6;
 
+Direction to_direction(char c) throw(std::out_of_range);
+char to_char(Direction d);
+
 // Direction arithmetic.
 
 Direction& operator+= (Direction& d, int i);
@@ -43,6 +46,10 @@ Direction& operator-- (Direction& d);
 Direction  operator-- (const Direction& d,int);
 
 std::ostream& operator<<(std::ostream& os, const Direction& d);
+
+/** steps is a string of characters A-F, representing a set of Directions.
+ *  This function rotates each step by i. */
+std::string rotate(const std::string& steps, int i);
 
 //
 // Forward declarations
@@ -169,6 +176,8 @@ public:
   int                     length(void) const; ///< in units of I
 public: // construction
   Path(const std::list<Hex*>& hexes): _hexes(hexes) {}
+  /** A Path starting at start, and proceeding in directions from steps. */
+  Path(Hex* start, const std::string& steps) throw(std::out_of_range);
 };
 
 
