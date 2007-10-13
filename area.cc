@@ -67,4 +67,14 @@ Area::Area(const std::set<Hex*>& hexes): _hexes(hexes)
 }
 
 
+Area::Area(Hex* h, int distance): _hexes()
+{
+  for(int i=0; i<=distance; ++i)
+  {
+    std::set<Hex*> s =range(h,i);
+    std::copy(s.begin(),s.end(),inserter(_hexes,_hexes.end()));
+  }
+}
+
+
 } // end namespace hex

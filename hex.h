@@ -155,6 +155,7 @@ public:
 public: // construction
   Area(const std::set<Hex*>& hexes);
   Area(Hex* h): _hexes() { _hexes.insert(h); }
+  Area(Hex* h, int distance); ///< All hexes <= distance from h.
 };
 
 
