@@ -32,43 +32,48 @@ go(int& i, int& j, Direction d, int distance)
 }
 
 
-Path
-path(Hex* from, Hex* to)
+void
+go(int& i, int& j, std::string steps)
 {
-  std::list<Hex*> result;
-  while( from->j() < to->j() )
+  for(std::string::const_iterator s=steps.begin(); s!=steps.end(); ++s)
+      go(i,j,to_direction(*s));
+}
+
+
+std::string
+steps(Hex* from, Hex* to)
+{
+  std::string result ="";
+  int i =from->i();
+  int j =from->j();
+  Direction direction;
+  while( j < to->j() )
   {
-    result.push_back(from);
-    if( from->i() < to->i() )
-        from=from->go(B);
-    else
-        from=from->go(C);
+    direction =( i < to->i()? B: C );
+    result += to_char(direction);
+    go(i,j,direction);
   }
-  while( from->j() > to->j() )
+  while( j > to->j() )
   {
-    result.push_back(from);
-    if( from->i() < to->i() )
-        from=from->go(F);
-    else
-        from=from->go(E);
+    direction =( i < to->i()? F: E );
+    result += to_char(direction);
+    go(i,j,direction);
   }
-  Direction di = (from->i()<to->i()? A: D);
-  while( from->i() != to->i() )
+  direction =( i < to->i()? A: D );
+  while( i != to->i() )
   {
-    result.push_back(from);
-    from=from->go(di);
+    result += to_char(direction);
+    go(i,j,direction);
   }
-  assert(from==to);
-  result.push_back(to);
+  assert(j==to->j());
   return result;
 }
 
 
 int
-distance(Hex* h0, Hex* h1)
+distance(Hex* from, Hex* to)
 {
-  Path p =path(h0,h1);
-  return p.length();
+  return steps(from,to).size();
 }
 
 

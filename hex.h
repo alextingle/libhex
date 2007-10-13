@@ -83,6 +83,7 @@ class Grid
 public:
   int  cols(void) const { return _rows.front()->size(); }
   int  rows(void) const { return _rows.size(); }
+  bool is_in_range(int i, int j) const {return 0<=i&&i<cols()&&0<=j&&j<rows();}
   Hex* hex(int i, int j) const throw(std::out_of_range);
   Hex* hex(Distance x, Distance y) const throw(std::out_of_range);
   Hex* hex(const Point& p) const throw(std::out_of_range);
@@ -178,6 +179,9 @@ public: // construction
   Path(const std::list<Hex*>& hexes): _hexes(hexes) {}
   /** A Path starting at start, and proceeding in directions from steps. */
   Path(Hex* start, const std::string& steps) throw(std::out_of_range);
+  /** Calculates a minimum-length path between two hexes.
+   *  The result is one of many possible solutions. */
+  Path(Hex* from, Hex* to) throw(std::out_of_range);
 };
 
 
@@ -211,15 +215,20 @@ void
 go(int& i, int& j, Direction d, int distance=1);
 
 
+/** Translates coordinates i,j along steps. */
+void
+go(int& i, int& j, std::string steps);
+
+
 /** Calculates a minimum-length path between two hexes.
  *  The result is one of many possible solutions. */
-Path
-path(Hex* from, Hex* to);
+std::string
+steps(Hex* from, Hex* to);
 
 
 /** The length of the shortest path between two hexes. */
 int
-distance(Hex* h0, Hex* h1);
+distance(Hex* from, Hex* to);
 
 
 /** Calculates the set of hexes that are range r from hex h.

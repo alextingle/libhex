@@ -196,7 +196,7 @@ int main()
   hex::Area a =s;
 */
 
-  hex::Area a =hex::path(g.hex(2,8),g.hex(7,5)).to_area();
+  hex::Area a =hex::Path(g.hex(2,8),g.hex(7,5)).to_area();
 
   cerr<<"a.size: "<<a.size()<<endl;
   hex::Boundary b =a.boundary();

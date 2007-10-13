@@ -21,19 +21,39 @@ Path::length(void) const
 }
 
 
-Path::Path(Hex* start, const std::string& steps) throw(std::out_of_range)
-  : _hexes()
+/** Helper: populate _hexes from steps. */
+inline void
+steps_to_hexes(
+    Hex*               start,
+    const std::string& steps,
+    std::list<Hex*>&   hexes
+  ) throw(std::out_of_range)
 {
-  _hexes.push_back(start);
+  hexes.push_back(start);
   for(std::string::size_type i=0; i<steps.size(); ++i)
   {
-    Hex* next =_hexes.back()->go( to_direction(steps[i]) );
+    Hex* next =hexes.back()->go( to_direction(steps[i]) );
     if(next)
-        _hexes.push_back( next );
+        hexes.push_back( next );
     else
         throw std::out_of_range("Path");
   }
 }
+
+
+Path::Path(Hex* start, const std::string& steps) throw(std::out_of_range)
+  : _hexes()
+{
+  steps_to_hexes(start,steps,_hexes);
+}
+
+
+Path::Path(Hex* from, Hex* to) throw(std::out_of_range)
+  : _hexes()
+{
+  steps_to_hexes(from,steps(from,to),_hexes);
+}
+
 
 
 } // end namespace hex
