@@ -3,6 +3,21 @@
 namespace hex {
 
 
+Direction to_direction(char c) throw(std::out_of_range)
+{
+  if(c<'A' || c>'F')
+      throw std::out_of_range(std::string("to_direction:")+c);
+  return A + static_cast<int>(c-'A');
+}
+
+
+char to_char(Direction d)
+{
+  static const char root =static_cast<char>( A );
+  return static_cast<char>( 'A' + (static_cast<char>(d) - root) );
+}
+
+
 Direction& operator+=(Direction& d, int i)
 {
   int d_ =static_cast<int>( d );
@@ -60,9 +75,20 @@ Direction operator--(const Direction& d,int)
 
 std::ostream& operator<<(std::ostream& os, const Direction& d)
 {
-  static const char root =static_cast<char>( A );
-  os << static_cast<char>( 'A' + (static_cast<char>(d) - root) );
+  os << to_char(d);
   return os;
+}
+
+
+std::string rotate(const std::string& steps, int i)
+{
+  std::string result ="";
+  for(std::string::size_type c=0; c<steps.size(); ++c)
+  {
+    Direction d =to_direction(steps[c]);
+    result += to_char(d+i);
+  }
+  return result;
 }
 
 

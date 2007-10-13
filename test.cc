@@ -182,7 +182,7 @@ int main()
     }
 */
 
- 
+/*
   set<Hex*> s;
   Hex* h =g.hex(4,4);
   s.insert(h);
@@ -194,6 +194,10 @@ int main()
   
 
   hex::Area a =s;
+*/
+
+  hex::Area a =hex::path(g.hex(2,8),g.hex(7,5)).to_area();
+
   cerr<<"a.size: "<<a.size()<<endl;
   hex::Boundary b =a.boundary();
   cerr<<"b.length: "<<b.length()<<endl;
