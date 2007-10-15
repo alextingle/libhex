@@ -21,39 +21,43 @@ Path::length(void) const
 }
 
 
+
 /** Helper: populate _hexes from steps. */
-inline void
-steps_to_hexes(
-    Hex*               start,
-    const std::string& steps,
-    std::list<Hex*>&   hexes
-  ) throw(std::out_of_range)
+inline std::list<Hex*>
+path(Hex* start, const std::string& steps) throw(std::out_of_range)
 {
+  // See also: go(int&,int&,const std::string&)
+  std::list<Hex*> hexes;
   hexes.push_back(start);
-  for(std::string::size_type i=0; i<steps.size(); ++i)
+  std::string::size_type cur =0;
+  while(cur<steps.size() && steps[cur]!='?')
   {
-    Hex* next =hexes.back()->go( to_direction(steps[i]) );
-    if(next)
-        hexes.push_back( next );
-    else
-        throw std::out_of_range("Path");
+    // Find direction
+    Direction dir =to_direction( steps[cur] );
+    ++cur;
+    bool repeat =(cur<steps.size() && steps[cur]=='*');
+    do{
+        Hex* next =hexes.back()->go( dir );
+        if(next)
+            hexes.push_back( next );
+        else if(*steps.rbegin()=='?' || repeat)
+            return hexes; // bail out instead of throwing
+        else
+            throw std::out_of_range("Path");
+    } while(repeat);
   }
+  return hexes;
 }
 
 
 Path::Path(Hex* start, const std::string& steps) throw(std::out_of_range)
-  : _hexes()
-{
-  steps_to_hexes(start,steps,_hexes);
-}
+  : _hexes( path(start,steps) )
+{}
 
 
 Path::Path(Hex* from, Hex* to) throw(std::out_of_range)
-  : _hexes()
-{
-  steps_to_hexes(from,steps(from,to),_hexes);
-}
-
+  : _hexes( path(from,steps(from,to)) )
+{}
 
 
 } // end namespace hex

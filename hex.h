@@ -217,7 +217,7 @@ go(int& i, int& j, Direction d, int distance=1);
 
 /** Translates coordinates i,j along steps. */
 void
-go(int& i, int& j, std::string steps);
+go(int& i, int& j, const std::string& steps);
 
 
 /** Calculates a minimum-length path between two hexes.

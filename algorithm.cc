@@ -33,10 +33,13 @@ go(int& i, int& j, Direction d, int distance)
 
 
 void
-go(int& i, int& j, std::string steps)
+go(int& i, int& j, const std::string& steps)
 {
   for(std::string::const_iterator s=steps.begin(); s!=steps.end(); ++s)
-      go(i,j,to_direction(*s));
+    if('A'<=*s && *s<='F')
+        go(i,j,to_direction(*s));
+    else
+        break; // Just bail out if we encounter a non-Direction character.
 }
 
 
