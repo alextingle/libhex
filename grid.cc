@@ -6,14 +6,21 @@ namespace hex {
 
 
 Hex*
-Grid::hex(int i, int j) const throw(std::out_of_range)
+Grid::hex(int i, int j) const throw(hex::out_of_range)
 {
-  return _rows.at(j)->at(i);
+  try
+  {
+    return _rows.at(j)->at(i);
+  }
+  catch(std::out_of_range& e)
+  {
+    throw hex::out_of_range(e.what());
+  }
 }
 
 
 Hex*
-Grid::hex(Distance x, Distance y) const throw(std::out_of_range)
+Grid::hex(Distance x, Distance y) const throw(hex::out_of_range)
 {
   int j = lround( (y-K)/J );
   int i;
@@ -26,7 +33,7 @@ Grid::hex(Distance x, Distance y) const throw(std::out_of_range)
 
 
 Hex*
-Grid::hex(const Point& p) const throw(std::out_of_range)
+Grid::hex(const Point& p) const throw(hex::out_of_range)
 {
   return hex(p.x,p.y);
 }

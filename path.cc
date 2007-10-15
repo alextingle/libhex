@@ -24,7 +24,8 @@ Path::length(void) const
 
 /** Helper: populate _hexes from steps. */
 inline std::list<Hex*>
-path(Hex* start, const std::string& steps) throw(std::out_of_range)
+path(Hex* start, const std::string& steps)
+  throw(hex::out_of_range,hex::invalid_argument)
 {
   // See also: go(int&,int&,const std::string&)
   std::list<Hex*> hexes;
@@ -43,19 +44,20 @@ path(Hex* start, const std::string& steps) throw(std::out_of_range)
         else if(*steps.rbegin()=='?' || repeat)
             return hexes; // bail out instead of throwing
         else
-            throw std::out_of_range("Path");
+            throw hex::out_of_range(std::string("path:")+steps);
     } while(repeat);
   }
   return hexes;
 }
 
 
-Path::Path(Hex* start, const std::string& steps) throw(std::out_of_range)
+Path::Path(Hex* start, const std::string& steps)
+  throw(hex::out_of_range,hex::invalid_argument)
   : _hexes( path(start,steps) )
 {}
 
 
-Path::Path(Hex* from, Hex* to) throw(std::out_of_range)
+Path::Path(Hex* from, Hex* to) throw()
   : _hexes( path(from,steps(from,to)) )
 {}
 

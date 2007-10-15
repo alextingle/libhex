@@ -3,10 +3,10 @@
 namespace hex {
 
 
-Direction to_direction(char c) throw(std::out_of_range)
+Direction to_direction(char c) throw(hex::invalid_argument)
 {
   if(c<'A' || c>'F')
-      throw std::out_of_range(std::string("to_direction:")+c);
+      throw hex::invalid_argument(std::string("to_direction:")+c);
   return A + static_cast<int>(c-'A');
 }
 

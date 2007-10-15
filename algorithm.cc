@@ -97,7 +97,7 @@ range(Hex* h, int distance)
     try {
       go(i,j,hex::A,distance); // in/out: i,j
       result.insert( grid.hex(i,j) );
-    } catch(std::out_of_range&) {}
+    } catch(hex::out_of_range&) {}
   
     for(int d=0; d<DIRECTIONS; ++d)
     {
@@ -106,7 +106,7 @@ range(Hex* h, int distance)
           try {
             go(i,j,direction); // in/out: i,j
             result.insert( grid.hex(i,j) );
-          } catch(std::out_of_range&) {}
+          } catch(hex::out_of_range&) {}
     }
   }
   return result;

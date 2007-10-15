@@ -8,12 +8,37 @@
 #include <vector>
 #include <stdexcept>
 #include <ostream>
+#include <string>
 
 
 #define HEX_PARANOID_CHECKS
 
 
 namespace hex {
+
+class exception: public std::exception
+{
+public:
+  std::string _what;
+  exception(const std::string& w) throw(): _what(w) {}
+  virtual ~exception() throw() {}
+  virtual const char* what() const throw() { return this->_what.c_str(); }
+};
+
+class invalid_argument: public hex::exception
+{
+public:
+  invalid_argument(const std::string& w) throw(): hex::exception(w) {}
+  virtual ~invalid_argument() throw() {}
+};
+
+class out_of_range: public hex::exception
+{
+public:
+  out_of_range(const std::string& w) throw(): hex::exception(w) {}
+  virtual ~out_of_range() throw() {}
+};
+
 
 //
 // Distance
@@ -31,7 +56,7 @@ const Distance K =1.0/M_SQRT3;
 enum Direction { A=0,B=1,C=2,D=3,E=4,F=5 };
 const int DIRECTIONS =6;
 
-Direction to_direction(char c) throw(std::out_of_range);
+Direction to_direction(char c) throw(hex::invalid_argument);
 char to_char(Direction d);
 
 // Direction arithmetic.
@@ -84,9 +109,9 @@ public:
   int  cols(void) const { return _rows.front()->size(); }
   int  rows(void) const { return _rows.size(); }
   bool is_in_range(int i, int j) const {return 0<=i&&i<cols()&&0<=j&&j<rows();}
-  Hex* hex(int i, int j) const throw(std::out_of_range);
-  Hex* hex(Distance x, Distance y) const throw(std::out_of_range);
-  Hex* hex(const Point& p) const throw(std::out_of_range);
+  Hex* hex(int i, int j) const throw(hex::out_of_range);
+  Hex* hex(Distance x, Distance y) const throw(hex::out_of_range);
+  Hex* hex(const Point& p) const throw(hex::out_of_range);
   Area to_area(void) const;
 public: // construction
   Grid(int cols, int rows);
@@ -178,10 +203,11 @@ public:
 public: // construction
   Path(const std::list<Hex*>& hexes): _hexes(hexes) {}
   /** A Path starting at start, and proceeding in directions from steps. */
-  Path(Hex* start, const std::string& steps) throw(std::out_of_range);
+  Path(Hex* start, const std::string& steps)
+    throw(hex::out_of_range,hex::invalid_argument);
   /** Calculates a minimum-length path between two hexes.
    *  The result is one of many possible solutions. */
-  Path(Hex* from, Hex* to) throw(std::out_of_range);
+  Path(Hex* from, Hex* to) throw();
 };
 
 
@@ -193,7 +219,7 @@ public:
   int                      length(void) const; ///< in units of K
   bool                     is_closed(void) const; ///< has no endpoints
   bool                     is_container(void) const; ///< contains finite area
-  Boundary                 complement(void) const throw(std::range_error);
+  Boundary                 complement(void) const throw(hex::out_of_range);
   const std::list<Edge*>&  edges(void) const { return _edges; }
   Path                     to_path(void) const;
   /** Calculate the set of points required to draw this boundary. */

@@ -29,7 +29,7 @@ Boundary::is_container(void) const
       Path p0 =to_path();
       return( p0.length() < p1.length() );
     }
-    catch(std::range_error) {
+    catch(hex::range_error) {
       // If is_closed AND there is no complement, then the boundary must
       // be at the very edge of the grid... it MUST be a container.
       return true;
@@ -40,7 +40,7 @@ Boundary::is_container(void) const
 
 
 Boundary
-Boundary::complement(void) const throw(std::range_error)
+Boundary::complement(void) const throw(hex::out_of_range)
 {
   std::list<Edge*> result;
   for(std::list<Edge*>::const_iterator e=_edges.begin(); e!=_edges.end(); ++e)
@@ -49,7 +49,7 @@ Boundary::complement(void) const throw(std::range_error)
     if(c)
         result.push_back( c );
     else
-        throw std::range_error("Boundary complement out of range.");
+        throw hex::out_of_range("Boundary complement out of range.");
   }
   return result;
 }

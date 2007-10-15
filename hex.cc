@@ -35,7 +35,7 @@ Hex::go(const Direction& d, int distance) const
   {
     return _grid.hex(i,j);
   }
-  catch(std::out_of_range)
+  catch(hex::out_of_range)
   {
     return NULL;
   }
