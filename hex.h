@@ -108,6 +108,8 @@ class Grid
 public:
   int  cols(void) const { return _rows.front()->size(); }
   int  rows(void) const { return _rows.size(); }
+  Distance width(void) const { return I/2.0 + I*cols(); }
+  Distance height(void) const { return K*2 + J*(rows()-1); }
   bool is_in_range(int i, int j) const {return 0<=i&&i<cols()&&0<=j&&j<rows();}
   Hex* hex(int i, int j) const throw(hex::out_of_range);
   Hex* hex(Distance x, Distance y) const throw(hex::out_of_range);

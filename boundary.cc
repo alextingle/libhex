@@ -29,7 +29,7 @@ Boundary::is_container(void) const
       Path p0 =to_path();
       return( p0.length() < p1.length() );
     }
-    catch(hex::range_error) {
+    catch(hex::out_of_range) {
       // If is_closed AND there is no complement, then the boundary must
       // be at the very edge of the grid... it MUST be a container.
       return true;

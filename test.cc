@@ -38,11 +38,11 @@ double factor=40.0;
 
 double X(hex::Distance x)
 {
-  return x * factor;
+  return x;// * factor;
 }
 double Y(hex::Distance y)
 {
-  return 400.0 - y * factor;
+  return y;//400.0 - y * factor;
 }
 
 
@@ -170,8 +170,12 @@ int main()
     "<?xml version=\"1.0\" standalone=\"no\"?>\n"
     "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
       "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
-    "<svg width=\"100%\" height=\"100%\" version=\"1.1\" "
-      "xmlns=\"http://www.w3.org/2000/svg\">\n";
+    "<svg width=\"100%\" height=\"100%\" viewBox=\""
+    "0 0 "<<g.width()+0.1<<" "<<g.height()+0.1<<
+    "\" version=\"1.1\" "
+      "xmlns=\"http://www.w3.org/2000/svg\">\n"
+    "<g transform=\"translate(0.05 "<<g.height()+0.05<<") scale(1 -1)\">\n"
+  ;
 /* 
   for(int i=0; i<3; ++i)
     for(int j=0; j<3; ++j)
@@ -196,7 +200,7 @@ int main()
   hex::Area a =s;
 */
 
-  hex::Area a =hex::Path(g.hex(2,8),g.hex(7,5)).to_area();
+  hex::Area a =hex::Path(g.hex(1,1),g.hex(7,5)).to_area();
 
   cerr<<"a.size: "<<a.size()<<endl;
   hex::Boundary b =a.boundary();
@@ -204,10 +208,10 @@ int main()
   cerr<<"b.is_closed: "<<b.is_closed()<<endl;
   cerr<<"b.is_container: "<<b.is_container()<<endl;
  
-  cout<<polyline(b.stroke(+0.1),"red",4)<<endl;
-  cout<<polylines(g.to_area().skeleton(),"black",0.2)<<endl;
+  cout<<polyline(b.stroke(+0.1),"red",0.04)<<endl;
+  cout<<polylines(g.to_area().skeleton(),"black",0.01)<<endl;
 
-  cout<<"</svg>"<<endl;
+  cout<<"</g></svg>"<<endl;
 
   return 0;
 }
