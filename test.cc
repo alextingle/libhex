@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "hex.h"
+#include "hexsvg.h"
 
 using namespace std;
 
@@ -207,8 +208,27 @@ int main()
   cerr<<"b.length: "<<b.length()<<endl;
   cerr<<"b.is_closed: "<<b.is_closed()<<endl;
   cerr<<"b.is_container: "<<b.is_container()<<endl;
- 
-  cout<<polyline(b.stroke(+0.1),"red",0.04)<<endl;
+
+  {
+    std::list<hex::Area> areas;
+    areas.push_back( hex::range(g.hex(5,5),2) );
+    hex::svg::ComplexArea sa(areas,+0.5);
+    sa.style["fill"]="#ddf";
+    sa.style["stroke"]="#99f";
+    sa.style["stroke-width"]="0.04";
+    cout<<sa;
+  }
+  {
+    std::list<hex::Area> areas;
+    areas.push_back( hex::Path(g.hex(1,3),g.hex(7,8)).to_area() );
+    hex::svg::ComplexArea sa(areas,-0.04);
+    sa.style["fill"]="none";
+    sa.style["stroke"]="green";
+    sa.style["stroke-width"]="0.04";
+    cout<<sa;
+  }
+
+  cout<<polyline(b.stroke(-0.1),"red",0.04)<<endl;
   cout<<polylines(g.to_area().skeleton(),"black",0.01)<<endl;
 
   cout<<"</g></svg>"<<endl;

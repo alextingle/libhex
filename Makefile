@@ -17,6 +17,7 @@ SOURCES := \
  grid.cc \
  hex.cc \
  path.cc \
+ svg.cc \
 
 .PHONY: all
 all: test
