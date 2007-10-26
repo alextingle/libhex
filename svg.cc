@@ -1,5 +1,7 @@
 #include "hexsvg.h"
 
+#include <cassert>
+
 
 namespace hex {
 namespace svg {
