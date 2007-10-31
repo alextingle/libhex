@@ -49,26 +49,32 @@ steps(Hex* from, Hex* to)
   std::string result ="";
   int i =from->i();
   int j =from->j();
+  const int to_i =to->i();
+  const int to_j =to->j();
   Direction direction;
-  while( j < to->j() )
+  while(true)
   {
-    direction =( i < to->i()? B: C );
+    if( j < to_j )                                   // go up
+    {
+        if(      i < to_i )          direction = B;
+        else if( i > to_i || !i%2 )  direction = C;
+        else                         direction = B;
+    }
+    else if( j > to_j )                              // go down
+    {
+        if(      i < to_i )          direction = F;
+        else if( i > to_i || !i%2 )  direction = E;
+        else                         direction = F;
+    }
+    else // j == to_j                                // go across
+    {
+        if(      i < to_i )          direction = A;
+        else if( i > to_i )          direction = D;
+        else                         break;          //  Done!
+    }
     result += to_char(direction);
     go(i,j,direction);
   }
-  while( j > to->j() )
-  {
-    direction =( i < to->i()? F: E );
-    result += to_char(direction);
-    go(i,j,direction);
-  }
-  direction =( i < to->i()? A: D );
-  while( i != to->i() )
-  {
-    result += to_char(direction);
-    go(i,j,direction);
-  }
-  assert(j==to->j());
   return result;
 }
 
