@@ -6,27 +6,22 @@
 #include "hex.h"
 
 #include <sstream>
-#include <map>
+
 
 namespace hex {
 namespace svg {
 
-typedef std::map<std::string,std::string> Style;
 
 /** Render a style dictionary to SVG. */
 std::string to_string(const Style& st);
+
 
 /** Abstract parent class for objects that render SVG elements. */
 class Element
 {
 public:
-  Style       style;
-  std::string className;
   virtual std::ostream& output(std::ostream& os) const =0;
   virtual ~Element(void) {}
-protected:
-  /** Helper, used by child types. */
-  std::string attributes(void) const;
 };
 
 
@@ -57,9 +52,10 @@ operator<<(std::ostream& os, hex::Point p)
 class Poly: public Element
 {
   std::list<Point>::const_iterator _first, _last;
-  bool _closed;
+  bool                             _closed;
+  const Identity*                  _identity; 
 public:
-  Poly(const std::list<Point>& pp, bool closed);
+  Poly(const std::list<Point>& pp, bool closed, const Identity* identity=NULL);
   virtual std::ostream& output(std::ostream& os) const;
 };
 
@@ -68,43 +64,136 @@ public:
 class Polygon: public Poly
 {
 public:
-  Polygon(const std::list<Point>& pp): Poly(pp,true) {}
+  Polygon(const std::list<Point>& pp, const Identity* identity=NULL)
+    : Poly(pp,true,identity)
+    {}
 };
 
 
-/** Draws the boundary around each of a list of areas, without worrying about
- *  voids within. */
-class SimpleArea: public Element
+
+//
+// Generic elements. Instantiate with an adapter.
+
+template<class T_Adapter>
+class Single: public Element
 {
-  const std::list<Area>& _areas;
-  float                  _bias;
 public:
-  SimpleArea(const std::list<Area>& areas, float bias =0.0);
-  virtual std::ostream& output(std::ostream& os) const;
+  typedef typename T_Adapter::source_type source_type;
+  Single(const source_type& source, const T_Adapter& adapter)
+    : _source(source), _adapter(adapter)
+    {}
+  /** This constructor only works in the adapter has a default constructor. */
+  Single(const source_type& source): _source(source), _adapter() {}
+  virtual std::ostream& output(std::ostream& os) const
+    {
+      return _adapter.output(os,_source);
+    }
+private:
+  const source_type&  _source;
+  const T_Adapter     _adapter;
 };
 
 
-/** Draws the boundary around each of a list of areas, taking account of
- *  voids within. */
-class ComplexArea: public Element
+template<class T_Adapter>
+class Group: public Element, public Identity
 {
-  const std::list<Area>& _areas;
-  float                  _bias;
 public:
-  ComplexArea(const std::list<Area>& areas, float bias =0.0);
-  virtual std::ostream& output(std::ostream& os) const;
+  typedef typename T_Adapter::source_type source_type;
+  Group(const std::list<source_type>& sources, const T_Adapter& adapter)
+    : _sources(sources), _adapter(adapter)
+    {}
+  std::ostream& output(std::ostream& os) const
+    {
+      os<<"<g"<<this->attributes()<<">\n";
+      for(typename std::list<source_type>::const_iterator s =_sources.begin();
+                                                          s!=_sources.end();
+                                                        ++s)
+      {
+        _adapter.output(os,*s);
+      }
+      os<<"</g>\n";
+      return os;
+    }
+private:
+  const std::list<source_type>&  _sources;
+  const T_Adapter                _adapter;
 };
 
+
+//
+// Area Adapters
+
+/** Draws the boundary around an area, without worrying about voids within. */
+class SimpleArea
+{
+  float _bias;
+public:
+  SimpleArea(float bias =0.0): _bias(bias) {}
+  typedef Area source_type;
+  std::ostream& output(std::ostream& os, const Area& a) const;
+};
+
+
+/** Draws the boundary around an area, taking account of voids within. */
+class ComplexArea 
+{
+  float _bias;
+public:
+  ComplexArea(float bias =0.0): _bias(bias) {}
+  typedef Area source_type;
+  std::ostream& output(std::ostream& os, const Area& a) const;
+};
+
+
+class Skeleton
+{
+  bool _include_boundary;
+public:
+  Skeleton(bool include_boundary =true): _include_boundary(include_boundary) {}
+  typedef Area source_type;
+  std::ostream& output(std::ostream& os, const Area& a) const;
+};
+
+
+//
+// Boundary Adapters
+
+/** Draws a boundary line. */
+class BoundaryLine
+{
+  float _bias;
+public:
+  BoundaryLine(float bias =0.0): _bias(bias) {}
+  typedef Boundary source_type;
+  std::ostream& output(std::ostream& os, const Boundary& b) const;
+};
+
+
+//
+// Path Adapters
+
+/** Draws a path line. */
+class PathLine
+{
+public:
+  PathLine(void) {}
+  typedef Path source_type;
+  std::ostream& output(std::ostream& os, const Path& p) const;
+};
+
+
+//
+// Document
 
 class Document
 {
-  std::ostringstream _buf;
+  const Grid&         _grid;
 public:
-  Document();
-  void header(void);
-  void footer(void);
-  const char* str() const { return _buf.str().c_str(); }
-  
+  std::list<Element*> elements;
+  Document(const Grid& grid): _grid(grid) {}
+  void header(std::ostream& os) const;
+  void footer(std::ostream& os) const;
+  std::ostream& output(std::ostream& os) const;
 };
 
 
