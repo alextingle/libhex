@@ -167,6 +167,7 @@ int main()
   return 0;
 */
 
+/* 
   cout<<
     "<?xml version=\"1.0\" standalone=\"no\"?>\n"
     "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
@@ -177,7 +178,6 @@ int main()
       "xmlns=\"http://www.w3.org/2000/svg\">\n"
     "<g transform=\"translate(0.05 "<<g.height()+0.05<<") scale(1 -1)\">\n"
   ;
-/* 
   for(int i=0; i<3; ++i)
     for(int j=0; j<3; ++j)
     {
@@ -209,29 +209,44 @@ int main()
   cerr<<"b.is_closed: "<<b.is_closed()<<endl;
   cerr<<"b.is_container: "<<b.is_container()<<endl;
 
-  {
-    std::list<hex::Area> areas;
-    areas.push_back( hex::range(g.hex(5,5),2) );
-    hex::svg::ComplexArea sa(areas,+0.5);
-    sa.style["fill"]="#ddf";
-    sa.style["stroke"]="#99f";
-    sa.style["stroke-width"]="0.04";
-    cout<<sa;
-  }
-  {
+  hex::svg::Document d(g);
+
+    Area r =hex::range(g.hex(5,5),2);
+    d.elements.push_back( new hex::svg::Single<hex::svg::ComplexArea>(r,+0.5) );
+    r.style["fill"]="#ddf";
+    r.style["stroke"]="#99f";
+    r.style["stroke-width"]="0.04";
+
     std::list<hex::Area> areas;
     areas.push_back( hex::Path(g.hex(1,3),g.hex(7,8)).to_area() );
-    hex::svg::ComplexArea sa(areas,-0.04);
-    sa.style["fill"]="none";
-    sa.style["stroke"]="green";
-    sa.style["stroke-width"]="0.04";
-    cout<<sa;
-  }
+    a.style["stroke"]="red";
+    areas.push_back( a );
+    hex::svg::Group<hex::svg::ComplexArea>* sa =
+      new hex::svg::Group<hex::svg::ComplexArea>(areas,-0.04);
+    d.elements.push_back( sa );
+    sa->style["fill"]="none";
+    sa->style["stroke"]="green";
+    sa->style["stroke-width"]="0.04";
 
-  cout<<polyline(b.stroke(-0.1),"red",0.04)<<endl;
-  cout<<polylines(g.to_area().skeleton(),"black",0.01)<<endl;
+//  cout<<polyline(b.stroke(-0.1),"red",0.04)<<endl;
+//  cout<<polylines(g.to_area().skeleton(),"black",0.01)<<endl;
 
-  cout<<"</g></svg>"<<endl;
+    Area ga =g.to_area();
+    d.elements.push_back( new hex::svg::Single<hex::svg::Skeleton>(ga,true) );
+    ga.style["fill"]="none";
+    ga.style["stroke"]="gray";
+    ga.style["stroke-width"]="0.01";
+//    cout<<sk;
+
+  hex::Path p(g.hex(3,7),g.hex(1,1));
+  p.style["fill"]="none";
+  p.style["stroke"]="#9f9";
+  p.style["stroke-width"]="0.08";
+  p.style["marker-end"]="url(#Triangle)";
+  d.elements.push_back( new hex::svg::Single<hex::svg::PathLine>(p) );
+
+//  cout<<"</g></svg>"<<endl;
+  d.output(cout);
 
   return 0;
 }

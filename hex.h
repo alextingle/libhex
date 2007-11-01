@@ -5,6 +5,7 @@
 
 #include <list>
 #include <set>
+#include <map>
 #include <vector>
 #include <stdexcept>
 #include <ostream>
@@ -15,6 +16,10 @@
 
 
 namespace hex {
+
+
+//
+// Exceptions
 
 class exception: public std::exception
 {
@@ -75,6 +80,28 @@ std::ostream& operator<<(std::ostream& os, const Direction& d);
 /** steps is a string of characters A-F, representing a set of Directions.
  *  This function rotates each step by i. */
 std::string rotate(const std::string& steps, int i);
+
+
+//
+// svg::Identity
+
+namespace svg {
+  typedef std::map<std::string,std::string> Style;
+  
+  /** Parent class for objects that can have an id, SVG style &
+   *  SVG class name. */
+  class Identity
+  {
+  public:
+    std::string  id;
+    Style        style;
+    std::string  className;
+    virtual ~Identity(void) {}
+    /** Helper, used by child types to render attributes into SVG. */
+    std::string attributes(void) const;
+  };
+} // end namespace svg
+
 
 //
 // Forward declarations
@@ -175,7 +202,7 @@ private:
 
 
 /** A connected set of hexes. */
-class Area
+class Area: public svg::Identity
 {
   std::set<Hex*>  _hexes;
 public:
@@ -195,7 +222,7 @@ public: // construction
 
 
 /** A sequence of adjacent hexes. */
-class Path
+class Path: public svg::Identity
 {
   std::list<Hex*>  _hexes;
 public:
@@ -214,7 +241,7 @@ public: // construction
 
 
 /** A sequence of adjacent edges. */
-class Boundary
+class Boundary: public svg::Identity
 {
   std::list<Edge*>  _edges;
 public:

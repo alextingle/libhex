@@ -41,22 +41,22 @@ output_path_data(std::ostream& os, InputIterator first, InputIterator last)
 
 
 std::string
-Element::attributes(void) const
-  {
-    std::string result ="";
-    if(!style.empty())
-        result += std::string(" style=\"") + to_string(style) + "\"";
-    if(!className.empty())
-        result += std::string(" class=\"") + className + "\"";
-    return result;
-  }
+Identity::attributes(void) const
+{
+  std::string result ="";
+  if(!style.empty())
+      result += std::string(" style=\"") + to_string(style) + "\"";
+  if(!className.empty())
+      result += std::string(" class=\"") + className + "\"";
+  return result;
+}
 
 
 //
 // Poly
 
-Poly::Poly(const std::list<Point>& pp, bool closed)
-  :_first(pp.begin()), _last(pp.end()), _closed(closed)
+Poly::Poly(const std::list<Point>& pp, bool closed, const Identity* identity)
+  :_first(pp.begin()), _last(pp.end()), _closed(closed), _identity(identity)
 {
   assert(_first!=_last);
   if(closed)
@@ -71,7 +71,9 @@ Poly::output(std::ostream& os) const
       os<<"<polygon";
   else
       os<<"<polyline";
-  os<<attributes()<<" points=\"";
+  if(_identity)
+      os<<_identity->attributes();
+  os<<" points=\"";
   for(std::list<Point>::const_iterator pos=_first; pos!=_last; ++pos)
   {
     if(pos!=_first)
@@ -86,18 +88,10 @@ Poly::output(std::ostream& os) const
 //
 // SimpleArea
 
-SimpleArea::SimpleArea(const std::list<Area>& areas, float bias)
-  :_areas(areas),_bias(bias)
-{}
-
-
 std::ostream&
-SimpleArea::output(std::ostream& os) const
+SimpleArea::output(std::ostream& os, const Area& a) const
 {
-  os<<"<g"<<attributes()<<">\n";
-  for(std::list<Area>::const_iterator a=_areas.begin(); a!=_areas.end(); ++a)
-      os<<Polygon(a->boundary().stroke(_bias));
-  os<<"</g>\n";
+  os<<Polygon(a.boundary().stroke(_bias),&a);
   return os;
 }
 
@@ -105,31 +99,130 @@ SimpleArea::output(std::ostream& os) const
 //
 // ComplexArea
 
-ComplexArea::ComplexArea(const std::list<Area>& areas, float bias)
-  :_areas(areas),_bias(bias)
-{}
+std::ostream&
+ComplexArea::output(std::ostream& os, const Area& a) const
+{
+  using namespace std;
+  os<<"<path fill-rule=\"nonzero\""<<a.attributes()<<" d=\"";
+  const std::list<Point> apoints =a.boundary().stroke(_bias);
+  output_path_data(os,apoints.begin(),apoints.end());
+  std::list<Area> voids =a.enclosed_areas();
+  for(list<Area>::const_iterator v=voids.begin(); v!=voids.end(); ++v)
+  {
+    os<<" ";
+    const std::list<Point> vpoints =v->boundary().stroke(-_bias);
+    output_path_data(os,vpoints.rbegin(),vpoints.rend());
+  }
+  os<<"\"/>\n";
+  return os;
+}
+
+
+//
+// Skeleton
+
+std::ostream&
+Skeleton::output(std::ostream& os, const Area& a) const
+{
+  os<<"<path"<<a.attributes()<<" d=\"";
+  const std::list<Boundary> bb =a.skeleton(this->_include_boundary);
+  for(std::list<Boundary>::const_iterator b=bb.begin(); b!=bb.end(); ++b)
+  {
+    const std::list<Edge*> edges =b->edges();
+    assert(!edges.empty());
+    os<<"M "<<edges.front()->start_point();
+    for(std::list<Edge*>::const_iterator e=edges.begin(); e!=edges.end(); ++e)
+        os<<"L "<<(**e).end_point();
+  }
+  os<<"\"/>\n";
+  return os;
+}
+
+
+//
+// BoundaryLine
+
+std::ostream&
+BoundaryLine::output(std::ostream& os, const Boundary& b) const
+{
+  os<<Poly(b.stroke(_bias),b.is_closed(),&b);
+  return os;
+}
+
+
+//
+// PathLine
+
+std::ostream&
+PathLine::output(std::ostream& os, const Path& p) const
+{
+  const std::list<Hex*>& hexes =p.hexes();
+  assert(!hexes.empty());
+  if(hexes.size()>1) // Nothing to draw if there is only one hex in the path.
+  {
+    std::list<Point> points;
+    for(std::list<Hex*>::const_iterator h =hexes.begin(); h!=hexes.end(); ++h)
+        points.push_back( (**h).centre() );
+    bool is_closed =( hexes.front()==hexes.back() );
+    os<<Poly(points,is_closed,&p);
+  }
+  return os;
+}
+
+
+//
+// Document
+
+void
+Document::header(std::ostream& os) const
+{
+  Distance width  =this->_grid.width();
+  Distance height =this->_grid.height();
+  Distance hmargin =0.05;
+  Distance vmargin =0.05;
+  os<<
+    "<?xml version=\"1.0\" standalone=\"no\"?>\n"
+    "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
+      "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
+    "<svg width=\"100%\" height=\"100%\" viewBox=\""
+    "0 0 "<<(width+hmargin*2.0)<<" "<<(height+vmargin*2.0)<<
+    "\" version=\"1.1\" "
+      "xmlns=\"http://www.w3.org/2000/svg\">\n"
+
+    "<defs>\n"
+    "<marker id=\"Triangle\""
+    " viewBox=\"0 0 10 10\" refX=\"0\" refY=\"5\" "
+    " markerUnits=\"strokeWidth\""
+    " markerWidth=\"4\" markerHeight=\"3\""
+    " orient=\"auto\">\n"
+    "<path d=\"M 0 0 L 10 5 L 0 10 z\" />\n"
+    "</marker>\n"
+    "</defs>\n"
+
+    "<g transform=\"translate("<<hmargin<<" "
+      <<(height+vmargin)<<") scale(1 -1)\">\n"
+  ;
+}
+
+
+void
+Document::footer(std::ostream& os) const
+{
+  os<<"</g></svg>"<<std::endl;
+}
 
 
 std::ostream&
-ComplexArea::output(std::ostream& os) const
+Document::output(std::ostream& os) const
 {
-  using namespace std;
-  os<<"<g fill-rule=\"nonzero\""<<attributes()<<">\n";
-  for(list<Area>::const_iterator a=_areas.begin(); a!=_areas.end(); ++a)
+  this->header(os);
+  for(std::list<Element*>::const_iterator e =this->elements.begin();
+                                          e!=this->elements.end();
+                                        ++e)
   {
-    os<<"<path d=\"";
-    const std::list<Point> apoints =a->boundary().stroke(_bias);
-    output_path_data(os,apoints.begin(),apoints.end());
-    std::list<Area> voids =a->enclosed_areas();
-    for(list<Area>::const_iterator v=voids.begin(); v!=voids.end(); ++v)
-    {
-      os<<" ";
-      const std::list<Point> vpoints =v->boundary().stroke(-_bias); // ?? bias?
-      output_path_data(os,vpoints.rbegin(),vpoints.rend());
-    }
-    os<<"\"/>\n";
+    (**e).output(os);
   }
-  os<<"</g>\n";
+  this->footer(os);
   return os;
 }
 
