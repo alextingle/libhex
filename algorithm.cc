@@ -47,10 +47,10 @@ std::string
 steps(Hex* from, Hex* to)
 {
   std::string result ="";
-  int i =from->i();
-  int j =from->j();
-  const int to_i =to->i();
-  const int to_j =to->j();
+  int i =from->i;
+  int j =from->j;
+  const int to_i =to->i;
+  const int to_j =to->j;
   Direction direction;
   while(true)
   {
@@ -97,8 +97,8 @@ range(Hex* h, int distance)
   else
   {
     const Grid& grid =h->grid();
-    int i =h->i();
-    int j =h->j();
+    int i =h->i;
+    int j =h->j;
   
     try {
       go(i,j,hex::A,distance); // in/out: i,j

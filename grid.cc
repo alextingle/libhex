@@ -1,6 +1,8 @@
 #include "hex.h"
 
-#include <math.h>
+#include <sstream>
+#include <cmath>
+#include <cerrno>
 
 namespace hex {
 
@@ -48,6 +50,27 @@ Grid::to_area(void) const
       for(Row::const_iterator i =(**j).begin(); i!=(**j).end(); ++i)
           hexes.insert( *i );
   return Area(hexes);  
+}
+
+
+Hex*
+Grid::hex(const std::string& s) const throw(out_of_range,invalid_argument)
+{
+  // Parse strings like: / *[-+]?\d+, *[-+]?\d+([^\d].*)?/
+  // E.g.  '1,2' ' +2, 4' '2,4 # comment'
+  const char* buf =s.c_str();
+  char* endptr =NULL;
+  errno=0;
+  int i =::strtol(buf,&endptr,10);
+  if(endptr==buf || *endptr!=',')
+      throw hex::invalid_argument(s);
+  buf =endptr+1;
+  int j =::strtol(buf,&endptr,10);
+  if(endptr==buf)
+      throw hex::invalid_argument(s);
+  if(ERANGE==errno)
+      throw hex::out_of_range(s);
+  return this->hex(i,j);
 }
 
 

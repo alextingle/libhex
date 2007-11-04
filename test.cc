@@ -11,7 +11,7 @@ ostream& operator<<(ostream& os, hex::Hex* h)
 {
   if(h)
   {
-    os<<"hex("<<h->i()<<","<<h->j()<<")";
+    os<<"hex("<<h->i<<","<<h->j<<")";
   }
   else
   {
