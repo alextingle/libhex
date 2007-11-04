@@ -1,4 +1,4 @@
-CXXFLAGS += -Wall
+CXXFLAGS += -Wall -I/usr/include/python2.4 -fno-strict-aliasing
 
 ifeq ($(DEBUG),1)
   CXXFLAGS += -g
@@ -27,9 +27,17 @@ deps.mk: $(wildcard *.cc) $(wildcard *.h)
 
 include deps.mk
 
+hex_wrap.cc: hex.i $(wildcard *.h)
+	swig -o $@ -classic -c++ -python $<
+
 test: test.o $(patsubst %.cc,%.o,$(SOURCES))
 	g++ $(LDFLAGS) $^ $(LIBS) -o $@
 
+.PHONY: pylib
+pylib: _hex.so
+_hex.so: hex_wrap.o $(patsubst %.cc,%.o,$(SOURCES))
+	g++ -shared $(LDFLAGS) $^ $(LIBS) -o $@
+
 .PHONY: clean
 clean:
-	rm -f *.o test
+	rm -f *.o *.so test
