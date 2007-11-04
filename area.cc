@@ -1,5 +1,6 @@
 #include "hex.h"
 
+#include <sstream>
 #include <cassert>
 
 namespace hex {
@@ -11,8 +12,8 @@ Area::boundary(void) const
   // Start with a random hex.
   Hex* h =*_hexes.begin();
   const Grid& grid =h->grid();
-  int i0 =h->i();
-  int j0 =h->j();
+  const int i0 =h->i;
+  const int j0 =h->j;
   // Find an edge.
   int i=0;
   while(i<=i0 && !contains(grid.hex(i,j0)))
@@ -56,6 +57,16 @@ Area::skeleton(bool include_boundary) const
   if(include_boundary)
       result.push_back(boundary());
   return result;
+}
+
+
+std::string
+Area::str(void) const
+{
+  std::ostringstream ss;
+  for(std::set<Hex*>::const_iterator h=_hexes.begin(); h!=_hexes.end(); ++h)
+      ss<<(**h).str()<<" ";
+  return ss.str();
 }
 
 

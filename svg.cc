@@ -44,10 +44,12 @@ std::string
 Identity::attributes(void) const
 {
   std::string result ="";
-  if(!style.empty())
-      result += std::string(" style=\"") + to_string(style) + "\"";
-  if(!className.empty())
-      result += std::string(" class=\"") + className + "\"";
+  if(!this->id.empty())
+      result += std::string(" id=\"") + this->id + "\"";
+  if(!this->style.empty())
+      result += std::string(" style=\"") + to_string(this->style) + "\"";
+  if(!this->className.empty())
+      result += std::string(" class=\"") + this->className + "\"";
   return result;
 }
 
@@ -78,7 +80,7 @@ Poly::output(std::ostream& os) const
   {
     if(pos!=_first)
        os<<" ";
-    os<<(*pos);
+    os<<pos->x<<","<<pos->y;
   }
   os<<"\"/>\n";
   return os;
@@ -91,8 +93,8 @@ Poly::output(std::ostream& os) const
 std::ostream&
 SimpleArea::output(std::ostream& os, const Area& a) const
 {
-  os<<Polygon(a.boundary().stroke(_bias),&a);
-  return os;
+  Polygon p(a.boundary().stroke(_bias),&a);
+  return p.output(os);
 }
 
 

@@ -1,5 +1,7 @@
 #include "hex.h"
 
+#include <sstream>
+
 namespace hex {
 
 
@@ -28,12 +30,12 @@ Hex::edge(const Direction& d) const
 Hex*
 Hex::go(const Direction& d, int distance) const
 {
-  int i =_i;
-  int j =_j;
-  hex::go(i,j,d,distance); // in/out: i,j 
+  int i_ =this->i;
+  int j_ =this->j;
+  hex::go(i_,j_,d,distance); // in/out: i_,j_ 
   try
   {
-    return _grid.hex(i,j);
+    return _grid.hex(i_,j_);
   }
   catch(hex::out_of_range)
   {
@@ -46,26 +48,35 @@ Point
 Hex::centre(void) const
 {
   Point result;
-  if(_j % 2)
-      result.x = I * (1 + _i); // odd rows
+  if(this->j % 2)
+      result.x = I * (1 + this->i); // odd rows
   else 
-      result.x = I/2.0 + I * _i; // even rows
-  result.y = K + J * _j;
+      result.x = I/2.0 + I * this->i; // even rows
+  result.y = K + J * this->j;
   return result;
 }
 
 
-Hex::Hex(const Grid& grid, int i, int j):
+std::string
+Hex::str(void) const
+{
+  std::ostringstream ss;
+  ss<< this->i <<","<< this->j;
+  return ss.str();
+}
+
+
+Hex::Hex(const Grid& grid, int i_, int j_):
   _edgeA(this,A), _edgeB(this,B), _edgeC(this,C),
   _edgeD(this,D), _edgeE(this,E), _edgeF(this,F),
-  _grid(grid), _i(i), _j(j)
+  _grid(grid), i(i_), j(j_)
 {}
 
 
 Hex::Hex(const Grid& grid, const Hex& h):
   _edgeA(this,A), _edgeB(this,B), _edgeC(this,C),
   _edgeD(this,D), _edgeE(this,E), _edgeF(this,F),
- _grid(grid), _i(h._i), _j(h._j)
+ _grid(grid), i(h.i), j(h.j)
 {}
 
 

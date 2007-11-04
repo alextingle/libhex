@@ -142,6 +142,8 @@ public:
   Hex* hex(Distance x, Distance y) const throw(hex::out_of_range);
   Hex* hex(const Point& p) const throw(hex::out_of_range);
   Area to_area(void) const;
+public: // factory methods
+  Hex* hex(const std::string& s) const throw(out_of_range,invalid_argument);
 public: // construction
   Grid(int cols, int rows);
 public: // housekeeping
@@ -181,23 +183,23 @@ class Hex
 {
   Edge  _edgeA,_edgeB,_edgeC,_edgeD,_edgeE,_edgeF;
   const Grid& _grid;
-  const int  _i, _j;
 public:
+  const int  i; ///< in units of I
+  const int  j; ///< in units of J
   const Grid&  grid(void) const { return _grid; }
   const Edge*  edge(const Direction& d) const;
   Edge*        edge(const Direction& d);
   Hex*         go(const Direction& d, int distance=1) const;
-  int          i(void) const { return _i; } ///< in units of I
-  int          j(void) const { return _j; } ///< in units of J
   Point        centre(void) const;
+  std::string  str(void) const;
 public: // construction
-  Hex(const Grid& grid, int i, int j);
-  Hex(const Grid& grid, const Hex& h);
+  Hex(const Grid& grid, int i_, int j_);
 private:
   friend class Grid;
-  Hex(const Hex& right);
-  Hex& operator=(const Hex&);
-  virtual ~Hex() {}
+  Hex(const Hex& right);               ///< No implementation.
+  Hex& operator=(const Hex&);          ///< No implementation.
+  Hex(const Grid& grid, const Hex& h); ///< Only callable by Grid.
+  virtual ~Hex() {}                    ///< Only callable by Grid.
 };
 
 
@@ -214,7 +216,9 @@ public:
   /** For drawing the structure. If include_boundary is TRUE, then the
    *  last item in the list is the external boundary of the area. */
   std::list<Boundary>    skeleton(bool include_boundary =true) const;
+  std::string            str(void) const;
 public: // construction
+  Area(void): _hexes() {} ///< Required for list<Area>
   Area(const std::set<Hex*>& hexes);
   Area(Hex* h): _hexes() { _hexes.insert(h); }
   Area(Hex* h, int distance); ///< All hexes <= distance from h.
@@ -229,6 +233,7 @@ public:
   Area                    to_area(void) const;
   const std::list<Hex*>&  hexes(void) const { return _hexes; }
   int                     length(void) const; ///< in units of I
+  std::string str(void) const { return "[Path foo]"; }
 public: // construction
   Path(const std::list<Hex*>& hexes): _hexes(hexes) {}
   /** A Path starting at start, and proceeding in directions from steps. */
@@ -257,6 +262,7 @@ public:
    * It is an error to call this function when is_closed()==false */
   Area  area(void) const;
 public: // construction
+  Boundary(void): _edges() {} ///< Required for list<Boundary>
   Boundary(const std::list<Edge*>& edges): _edges(edges) {}
 };
 

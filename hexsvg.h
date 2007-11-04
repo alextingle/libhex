@@ -33,13 +33,6 @@ operator<<(std::ostream& os, const Element& e)
 
 
 inline std::ostream&
-operator<<(std::ostream& os, const Element* e)
-{
-  return e->output(os);
-}
-
-
-inline std::ostream&
 operator<<(std::ostream& os, hex::Point p)
 {
   os<<p.x<<","<<p.y;
