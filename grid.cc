@@ -74,6 +74,68 @@ Grid::hex(const std::string& s) const throw(out_of_range,invalid_argument)
 }
 
 
+std::set<Hex*>
+Grid::hexes(const std::string& s) const throw(out_of_range,invalid_argument)
+{
+  // Parse string of space-separated hex coordinates.
+  // E.g. 1,2 2,3 3,4
+  std::istringstream is(s);
+  std::set<Hex*> result;
+  while(is.good())
+  {
+    std::string tok;
+    is>>tok;
+    if(!tok.empty())
+        result.insert( this->hex(tok) );
+  }
+  return result;
+}
+
+
+Path
+Grid::path(const std::string& s) const throw(out_of_range,invalid_argument)
+{
+  std::string::size_type colon =s.find(':');
+  if(colon==std::string::npos || (colon+1)>=s.size())
+      throw hex::invalid_argument(s);
+  Hex* origin =this->hex( s.substr(0,colon) );
+  Path result(origin,s.substr(colon+1));
+  return result;
+}
+
+
+Boundary
+Grid::boundary(const std::string& s) const throw(out_of_range,invalid_argument)
+{
+  std::list<Edge*> result;
+  std::string::size_type plus_minus =s.find_first_of("+-");
+  if(plus_minus==std::string::npos || (plus_minus+1)>=s.size())
+      throw hex::invalid_argument(s);
+  bool clockwise =( '-' == s[plus_minus] );
+  for(std::string::size_type pos =plus_minus+1; pos<s.size(); ++pos)
+  {
+    Direction d =to_direction(s[pos]);
+    Edge* next;
+    if(result.empty())
+    {
+      next = this->hex(s.substr(0,plus_minus))->edge(d);
+    }
+    else
+    {
+      next = result.back()->next_in(clockwise);
+      if(next->direction() != d)
+      {
+        next = result.back()->next_out(clockwise);
+        if(next->direction() != d)
+            throw hex::invalid_argument(s);
+      }
+    }
+    result.push_back(next);
+  }
+  return result;
+}
+
+
 Grid::Grid(int cols, int rows): _rows()
 {
   for(int j=0; j<rows; ++j)

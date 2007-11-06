@@ -30,16 +30,16 @@ Edge::is_next(const Edge& v) const
 
 
 Edge*
-Edge::next_in(bool reverse) const
+Edge::next_in(bool clockwise) const
 {
-  return _hex->edge(_direction + (reverse? -1: 1) );
+  return _hex->edge(_direction + (clockwise? -1: 1) );
 }
 
 
 Edge*
-Edge::next_out(bool reverse) const
+Edge::next_out(bool clockwise) const
 {
-  int one =(reverse? -1: 1);
+  int one =(clockwise? -1: 1);
   Edge* c =_hex->edge( _direction + one )->complement();
   if(c)
       return c->_hex->edge( _direction - one );
@@ -70,16 +70,19 @@ Point corner_offset(Point p, Direction d, float bias)
 
 
 Point
-Edge::start_point(float bias) const
+Edge::start_point(float bias, bool clockwise) const
 {
-  return corner_offset( _hex->centre(), _direction, bias );
+  if(clockwise)
+      return corner_offset( _hex->centre(), _direction + 1, bias );
+  else
+      return corner_offset( _hex->centre(), _direction    , bias );
 }
 
 
 Point
-Edge::end_point(float bias) const
+Edge::end_point(float bias, bool clockwise) const
 {
-  return corner_offset( _hex->centre(), _direction + 1, bias );
+  return start_point(bias,!clockwise);
 }
 
 
@@ -88,18 +91,23 @@ Edge::join_point(const Edge* next, float bias) const
 {
   if(bias==0.0 || this->_hex==next->_hex)
   {
-    return end_point(bias);
+    if(this->_direction+1 == next->_direction)
+        return end_point(bias);
+    else
+        return start_point(bias); // clockwise
   }
-  else
+  else if(next == next_out())
   {
-#ifdef HEX_PARANOID_CHECKS
-    // The direction is assumed to not be reversed.
-    // ?? Could improve this function to allow for reversed edges,
-    // but for now, we'll just assert that 'next' is indeed next.
-    assert(next == next_out());
-#endif
     Point p =corner_offset( _hex->centre(), _direction + 2, 0.0 );
     return corner_offset( p, _direction, bias );
+  }
+  else // clockwise
+  {
+#ifdef HEX_PARANOID_CHECKS
+    assert(next == next_out(true));
+#endif
+    Point p =corner_offset( _hex->centre(), _direction - 1, 0.0 );
+    return corner_offset( p, _direction + 1, bias );
   }
 }
 
