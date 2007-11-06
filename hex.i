@@ -11,7 +11,7 @@
 %include <std_set.i>
 %include <std_map.i>
 %include <std_pair.i>
-%include <std_except.i>
+//%include <std_except.i>
 //%include <std_iostream.i>
 %include <std_string.i>
 
