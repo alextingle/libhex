@@ -253,7 +253,7 @@ public: // construction
     throw(hex::out_of_range,hex::invalid_argument);
   /** Calculates a minimum-length path between two hexes.
    *  The result is one of many possible solutions. */
-  Path(Hex* from, Hex* to) throw();
+  Path(Hex* from, const Hex* to) throw();
 };
 
 

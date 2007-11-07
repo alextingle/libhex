@@ -81,7 +81,7 @@ Path::Path(Hex* start, const std::string& steps)
 {}
 
 
-Path::Path(Hex* from, Hex* to) throw()
+Path::Path(Hex* from, const Hex* to) throw()
   : _hexes( path(from,hex::steps(from,to)) )
 {}
 
