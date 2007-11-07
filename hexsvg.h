@@ -15,6 +15,9 @@ namespace svg {
 /** Render a style dictionary to SVG. */
 std::string to_string(const Style& st);
 
+/** Construct a style dictionary from an SVG string. */
+Style style(const std::string& s) throw(hex::invalid_argument);
+
 
 /** Abstract parent class for objects that render SVG elements. */
 class Element

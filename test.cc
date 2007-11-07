@@ -253,11 +253,12 @@ int main()
   list<Edge*> le =p.to_area().boundary().edges();//.complement();
   le.pop_back();
   Boundary pb(le);
-  pb =g.boundary( "4,1+DEFEFAFAFAFABABCBCDCDCDEFEDC" );
-  pb.style["fill"]="none";
-  pb.style["stroke"]="#800";
-  pb.style["stroke-width"]="0.04";
-  pb.style["marker-end"]="url(#Triangle)";
+  pb =g.boundary( "4,2+DEFEFAFAFAFABABCBCDCDCDEFEDC" );
+  pb.style=hex::svg::style("fill:none; stroke:#800;  stroke-width:0.04;   marker-end :\t url(#Triangle)   ");
+//  pb.style["fill"]="none";
+//  pb.style["stroke"]="#800";
+//  pb.style["stroke-width"]="0.04";
+//  pb.style["marker-end"]="url(#Triangle)";
   cerr<<pb.str()<<" "<<pb.is_closed()<<endl;
   d.elements.push_back( new hex::svg::Single<hex::svg::BoundaryLine>(pb,-0.3) );
 
