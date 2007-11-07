@@ -44,7 +44,7 @@ go(int& i, int& j, const std::string& steps)
 
 
 std::string
-steps(Hex* from, Hex* to)
+steps(const Hex* from, const Hex* to)
 {
   std::string result ="";
   int i =from->i;
@@ -57,13 +57,13 @@ steps(Hex* from, Hex* to)
     if( j < to_j )                                   // go up
     {
         if(      i < to_i )          direction = B;
-        else if( i > to_i || !i%2 )  direction = C;
+        else if( i > to_i || j%2 )   direction = C;
         else                         direction = B;
     }
     else if( j > to_j )                              // go down
     {
         if(      i < to_i )          direction = F;
-        else if( i > to_i || !i%2 )  direction = E;
+        else if( i > to_i || j%2 )   direction = E;
         else                         direction = F;
     }
     else // j == to_j                                // go across
@@ -80,7 +80,7 @@ steps(Hex* from, Hex* to)
 
 
 int
-distance(Hex* from, Hex* to)
+distance(const Hex* from, const Hex* to)
 {
   return steps(from,to).size();
 }

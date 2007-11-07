@@ -7,6 +7,16 @@ namespace hex {
 namespace svg {
 
 
+/** Helper function - strip whitespace from the start & end of a string. */
+std::string
+strip(const std::string& s)
+{
+  std::string::size_type p0 =s.find_first_not_of(" \t\n");
+  std::string::size_type p1 =s.find_last_of(" \t\n");
+  return s.substr(p0,p1-p0);
+}
+
+
 std::string
 to_string(const Style& st)
 {
@@ -16,6 +26,28 @@ to_string(const Style& st)
     if(!result.empty())
         result += ';';
     result += it->first + ":" + it->second;
+  }
+  return result;
+}
+
+
+Style
+style(const std::string& s) throw(hex::invalid_argument)
+{
+  Style result;
+  std::string::size_type pos =0;
+  while(true)
+  {
+    pos=s.find_first_not_of(";",pos);
+    if(pos==std::string::npos)
+        break;
+    std::string::size_type semi =s.find(";",pos);
+    std::string clause =s.substr(pos,semi-pos);
+    std::string::size_type colon =clause.find(":");
+    if(colon==std::string::npos || colon==0 || (colon+1)>=clause.size())
+        throw hex::invalid_argument(s);
+    result[ strip(s.substr(0,colon)) ] = strip(s.substr(colon+1));
+    pos=semi;
   }
   return result;
 }
@@ -199,7 +231,7 @@ Document::header(std::ostream& os) const
     " orient=\"auto\">\n"
     "<path d=\"M 0 0 L 10 5 L 0 10 z\" />\n"
     "</marker>\n"
-    "</defs>\n"
+    "</defs>\n" 
 
     "<g transform=\"translate("<<hmargin<<" "
       <<(height+vmargin)<<") scale(1 -1)\">\n"

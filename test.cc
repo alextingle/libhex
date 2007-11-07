@@ -211,39 +211,56 @@ int main()
 
   hex::svg::Document d(g);
 
-    Area r =hex::range(g.hex(5,5),2);
-    d.elements.push_back( new hex::svg::Single<hex::svg::ComplexArea>(r,+0.5) );
-    r.style["fill"]="#ddf";
-    r.style["stroke"]="#99f";
-    r.style["stroke-width"]="0.04";
+  Area test =hex::range(g.hex(5,5),2);
+  Area r=g.hexes(test.str()); // Test str parsing.
+  d.elements.push_back( new hex::svg::Single<hex::svg::ComplexArea>(r,+0.5) );
+  r.style["fill"]="#ddf";
+  r.style["stroke"]="#99f";
+  r.style["stroke-width"]="0.04";
 
-    std::list<hex::Area> areas;
-    areas.push_back( hex::Path(g.hex(1,3),g.hex(7,8)).to_area() );
-    a.style["stroke"]="red";
-    areas.push_back( a );
-    hex::svg::Group<hex::svg::ComplexArea>* sa =
-      new hex::svg::Group<hex::svg::ComplexArea>(areas,-0.04);
-    d.elements.push_back( sa );
-    sa->style["fill"]="none";
-    sa->style["stroke"]="green";
-    sa->style["stroke-width"]="0.04";
+  cerr<<r.str()<<endl;
+
+  std::list<hex::Area> areas;
+  areas.push_back( hex::Path(g.hex(1,3),g.hex(7,8)).to_area() );
+  a.style["stroke"]="red";
+  areas.push_back( a );
+  hex::svg::Group<hex::svg::ComplexArea>* sa =
+    new hex::svg::Group<hex::svg::ComplexArea>(areas,-0.04);
+  d.elements.push_back( sa );
+  sa->style["fill"]="none";
+  sa->style["stroke"]="green";
+  sa->style["stroke-width"]="0.04";
 
 //  cout<<polyline(b.stroke(-0.1),"red",0.04)<<endl;
 //  cout<<polylines(g.to_area().skeleton(),"black",0.01)<<endl;
 
-    Area ga =g.to_area();
-    d.elements.push_back( new hex::svg::Single<hex::svg::Skeleton>(ga,true) );
-    ga.style["fill"]="none";
-    ga.style["stroke"]="gray";
-    ga.style["stroke-width"]="0.01";
+  Area ga =g.to_area();
+  d.elements.push_back( new hex::svg::Single<hex::svg::Skeleton>(ga,true) );
+  ga.style["fill"]="none";
+  ga.style["stroke"]="gray";
+  ga.style["stroke-width"]="0.01";
 //    cout<<sk;
 
-  hex::Path p(g.hex(3,7),g.hex(1,1));
+//  hex::Path p(g.hex(7,1),g.hex(1,7));
+//cerr<<p.str()<<endl;
+  hex::Path p =g.path("3,1:ABCDBBAFE");
   p.style["fill"]="none";
   p.style["stroke"]="#9f9";
   p.style["stroke-width"]="0.08";
   p.style["marker-end"]="url(#Triangle)";
   d.elements.push_back( new hex::svg::Single<hex::svg::PathLine>(p) );
+  
+  list<Edge*> le =p.to_area().boundary().edges();//.complement();
+  le.pop_back();
+  Boundary pb(le);
+  pb =g.boundary( "4,2+DEFEFAFAFAFABABCBCDCDCDEFEDC" );
+  pb.style=hex::svg::style("fill:none; stroke:#800;  stroke-width:0.04;   marker-end :\t url(#Triangle)   ");
+//  pb.style["fill"]="none";
+//  pb.style["stroke"]="#800";
+//  pb.style["stroke-width"]="0.04";
+//  pb.style["marker-end"]="url(#Triangle)";
+  cerr<<pb.str()<<" "<<pb.is_closed()<<endl;
+  d.elements.push_back( new hex::svg::Single<hex::svg::BoundaryLine>(pb,-0.3) );
 
 //  cout<<"</g></svg>"<<endl;
   d.output(cout);

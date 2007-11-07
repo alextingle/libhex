@@ -40,4 +40,4 @@ _hex.so: hex_wrap.o $(patsubst %.cc,%.o,$(SOURCES))
 
 .PHONY: clean
 clean:
-	rm -f *.o *.so test
+	rm -f *.o *.so test hex_wrap.cc hex.py
