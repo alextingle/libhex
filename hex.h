@@ -244,12 +244,8 @@ public:
   Area                    to_area(void) const;
   const std::list<Hex*>&  hexes(void) const { return _hexes; }
   int                     length(void) const; ///< in units of I
-<<<<<<< HEAD/hex.h
-  std::string str(void) const { return "[Path foo]"; }
-=======
   std::string             steps(void) const;
   std::string             str(void) const;
->>>>>>> ac7a46dc2aa1d0986a90413baf699a7135f87038/hex.h
 public: // construction
   Path(const std::list<Hex*>& hexes): _hexes(hexes) {}
   /** A Path starting at start, and proceeding in directions from steps. */
