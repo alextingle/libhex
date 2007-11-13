@@ -12,11 +12,13 @@ namespace hex {
 namespace svg {
 
 
+typedef std::map<std::string,std::string> Style;
+
 /** Render a style dictionary to SVG. */
-std::string to_string(const Style& st);
+std::string style_str(const Style& st);
 
 /** Construct a style dictionary from an SVG string. */
-Style style(const std::string& s) throw(hex::invalid_argument);
+Style style_dict(const std::string& s) throw(hex::invalid_argument);
 
 
 /** Abstract parent class for objects that render SVG elements. */
@@ -185,11 +187,12 @@ class Document
 {
   const Grid&         _grid;
 public:
-  std::list<Element*> elements;
+  std::list<Element*>  elements;
   Document(const Grid& grid): _grid(grid) {}
-  void header(std::ostream& os) const;
-  void footer(std::ostream& os) const;
-  std::ostream& output(std::ostream& os) const;
+  void           header(std::ostream& os) const;
+  void           footer(std::ostream& os) const;
+  std::ostream&  output(std::ostream& os) const;
+  std::string    str(void) const;
 };
 
 
