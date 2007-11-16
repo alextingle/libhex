@@ -18,7 +18,7 @@ strip(const std::string& s)
 
 
 std::string
-to_string(const Style& st)
+style_str(const Style& st)
 {
   std::string result ="";
   for(Style::const_iterator it=st.begin(); it!=st.end(); ++it)
@@ -32,7 +32,7 @@ to_string(const Style& st)
 
 
 Style
-style(const std::string& s) throw(hex::invalid_argument)
+style_dict(const std::string& s) throw(hex::invalid_argument)
 {
   Style result;
   std::string::size_type pos =0;
@@ -79,7 +79,7 @@ Identity::attributes(void) const
   if(!this->id.empty())
       result += std::string(" id=\"") + this->id + "\"";
   if(!this->style.empty())
-      result += std::string(" style=\"") + to_string(this->style) + "\"";
+      result += std::string(" style=\"") + this->style + "\"";
   if(!this->className.empty())
       result += std::string(" class=\"") + this->className + "\"";
   return result;
@@ -258,6 +258,15 @@ Document::output(std::ostream& os) const
   }
   this->footer(os);
   return os;
+}
+
+
+std::string
+Document::str(void) const
+{
+  std::ostringstream ss;
+  this->output(ss);
+  return ss.str();
 }
 
 

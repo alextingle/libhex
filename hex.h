@@ -86,15 +86,13 @@ std::string rotate(const std::string& steps, int i);
 // svg::Identity
 
 namespace svg {
-  typedef std::map<std::string,std::string> Style;
-  
   /** Parent class for objects that can have an id, SVG style &
    *  SVG class name. */
   class Identity
   {
   public:
     std::string  id;
-    Style        style;
+    std::string  style;
     std::string  className;
     virtual ~Identity(void) {}
     /** Helper, used by child types to render attributes into SVG. */
