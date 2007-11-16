@@ -95,6 +95,10 @@ class Group: public Element, public Identity
 {
 public:
   typedef typename T_Adapter::source_type source_type;
+  /** Constructor for adapters with a default constructor. */
+  Group(const std::list<source_type>& sources)
+    : _sources(sources), _adapter()
+    {}
   Group(const std::list<source_type>& sources, const T_Adapter& adapter)
     : _sources(sources), _adapter(adapter)
     {}

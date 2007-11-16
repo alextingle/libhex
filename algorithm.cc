@@ -1,6 +1,7 @@
 #include "hex.h"
 
 #include <cassert>
+#include <sstream>
 
 namespace hex {
 
@@ -142,6 +143,29 @@ set_intersection(const std::set<Hex*>& a, const std::set<Hex*>& b)
     std::inserter(result,result.end())
   );
   return result;
+}
+
+
+std::set<Hex*>
+set_union(const std::set<Hex*>& a, const std::set<Hex*>& b)
+{
+  std::set<Hex*> result;
+  std::set_union(
+    a.begin(),a.end(),
+    b.begin(),b.end(),
+    std::inserter(result,result.end())
+  );
+  return result;
+}
+
+
+std::string
+set_str(const std::set<Hex*>& a)
+{
+  std::ostringstream ss;
+  for(std::set<Hex*>::const_iterator h=a.begin(); h!=a.end(); ++h)
+      ss<<(**h).str()<<" ";
+  return ss.str();
 }
 
 

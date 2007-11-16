@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cmath>
 #include <cerrno>
+#include <cassert>
 
 namespace hex {
 
@@ -87,6 +88,36 @@ Grid::hexes(const std::string& s) const throw(out_of_range,invalid_argument)
     is>>tok;
     if(!tok.empty())
         result.insert( this->hex(tok) );
+  }
+  return result;
+}
+
+
+Area
+Grid::area(const std::string& s) const throw(out_of_range,invalid_argument)
+{
+  // Parse string of area fillpaths
+  // E.g. 1,2>CDE:ABC
+  std::set<Hex*> result;
+  std::string::size_type pos =s.find_first_of(":>");
+  if(pos==std::string::npos)
+      throw hex::invalid_argument(s);
+  Hex* origin =this->hex( s.substr(0,pos) );
+  Hex* start  =origin;
+  while(pos!=std::string::npos)
+  {
+    std::string::size_type next =s.find_first_of(":>",pos+1);
+    std::string steps =s.substr( pos+1, (next==s.npos)?(next):(next-pos-1) );
+    if(s[pos]=='>')
+    {
+      start=origin->go(steps);
+    }
+    else // ':'
+    {
+      std::list<Hex*> hexes =Path(start,steps).hexes();
+      std::copy(hexes.begin(), hexes.end(), inserter(result,result.end()));
+    }
+    pos=next;
   }
   return result;
 }
