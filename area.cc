@@ -1,7 +1,7 @@
 #include "hex.h"
 
-#include <sstream>
 #include <cassert>
+#include <sstream>
 
 namespace hex {
 
@@ -60,13 +60,91 @@ Area::skeleton(bool include_boundary) const
 }
 
 
-std::string
-Area::str(void) const
+std::list<hex::Path>
+Area::fillpaths(Hex* origin) const ///< EXPERIMENT
 {
-  std::ostringstream ss;
+  // Experiment
+  // Try to calculate a path that fills area.
+  std::set<Hex*> queue =_hexes;
+  std::set<Hex*> seen;
+  std::list<Path> result;
+  std::list<Hex*> path;
+  Hex*      hex = origin? origin: *queue.begin();
+  Direction dir =F;
+  while(!queue.empty())
+  {
+    path.push_back( hex );
+    queue.erase( hex );
+    seen.insert( hex );
+    Direction d=dir+1;
+    while(true)
+    {
+      if(d==dir)
+      {
+        result.push_back( path );
+        path.clear();
+        hex = *queue.begin();
+        break;
+      }
+      Hex* hd =hex->go(d);
+      if(queue.count(hd) && !seen.count(hd))
+      {
+        hex = hd;
+        dir = d+3;
+        break;
+      }
+      ++d;
+    }
+  }
+  return result;
+}
+
+
+std::string
+Area::str(Hex* origin) const
+{
+  if(!origin)
+      origin=*_hexes.begin();
+  std::ostringstream result;
+  std::list<Path> paths  =this->fillpaths(origin);
+  result << origin->str();
+  for(std::list<Path>::const_iterator p =paths.begin(); p!=paths.end(); ++p)
+  {
+    if(p->hexes().front()!=origin)
+        result << ">" << hex::steps(origin,p->hexes().front());
+    result << ":" << p->steps();
+  }
+  return result.str();
+}
+
+
+Area
+Area::go(const Direction& d, int distance) const throw(hex::out_of_range)
+{
+  Area result;
   for(std::set<Hex*>::const_iterator h=_hexes.begin(); h!=_hexes.end(); ++h)
-      ss<<(**h).str()<<" ";
-  return ss.str();
+  {
+    Hex* hex =(**h).go(d,distance);
+    if(!hex)
+        throw hex::out_of_range("Area::go");
+    result._hexes.insert(hex);
+  }
+  return result;
+}
+
+
+Area
+Area::go(const std::string& steps) const throw(hex::out_of_range)
+{
+  Area result;
+  for(std::set<Hex*>::const_iterator h=_hexes.begin(); h!=_hexes.end(); ++h)
+  {
+    Hex* hex =(**h).go(steps);
+    if(!hex)
+        throw hex::out_of_range("Area::go");
+    result._hexes.insert(hex);
+  }
+  return result;
 }
 
 

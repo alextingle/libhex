@@ -82,12 +82,14 @@ std::ostream& operator<<(std::ostream& os, const Direction& d)
 
 std::string rotate(const std::string& steps, int i)
 {
-  std::string result ="";
-  for(std::string::size_type c=0; c<steps.size(); ++c)
-  {
-    Direction d =to_direction(steps[c]);
-    result += to_char(d+i);
-  }
+  // Rotate all letters A-F, but leave other characters alone.
+  std::string result =steps;
+  for(std::string::iterator c=result.begin(); c!=result.end(); ++c)
+      if('A'<=*c && *c<='F')
+      {
+        Direction d =to_direction(*c);
+        *c = to_char(d+i);
+      }
   return result;
 }
 

@@ -44,6 +44,23 @@ Hex::go(const Direction& d, int distance) const
 }
 
 
+Hex*
+Hex::go(const std::string& steps) const
+{
+  int i_ =this->i;
+  int j_ =this->j;
+  hex::go(i_,j_,steps); // in/out: i_,j_ 
+  try
+  {
+    return _grid.hex(i_,j_);
+  }
+  catch(hex::out_of_range)
+  {
+    return NULL;
+  }
+}
+
+
 Point
 Hex::centre(void) const
 {
