@@ -19,8 +19,8 @@ int main()
 
 
   Area r =hex::range(g.hex(5,5),2);
-  d.elements.push_back( new hex::svg::Single<hex::svg::ComplexArea>(r,+0.5) );
   r.style="fill:#ddf; stroke:#99f; stroke-width:0.04";
+  d.elements.push_back( new hex::svg::Single<hex::svg::ComplexArea>(r,+0.5) );
 
   cerr<<r.str()<<endl;
 
@@ -34,8 +34,8 @@ int main()
   sa->style="fill:none; stroke:green; stroke-width:0.04";
 
   Area ga =g.to_area();
-  d.elements.push_back( new hex::svg::Single<hex::svg::Skeleton>(ga,true) );
   ga.style="fill:none; stroke:gray; stroke-width:0.01";
+  d.elements.push_back( new hex::svg::Single<hex::svg::Skeleton>(ga,true) );
 
   hex::Path p =g.path("3,1:ABCDBBAFE");
   p.style="fill:none;stroke:#9f9; stroke-width:0.08; marker-end:url(#Triangle)";

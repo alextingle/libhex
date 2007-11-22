@@ -1,6 +1,7 @@
 #include "hexsvg.h"
 
 #include <cassert>
+#include <sstream>
 
 
 namespace hex {
@@ -125,7 +126,7 @@ Poly::output(std::ostream& os) const
 std::ostream&
 SimpleArea::output(std::ostream& os, const Area& a) const
 {
-  Polygon p(a.boundary().stroke(_bias),&a);
+  Polygon p(a.boundary().stroke(bias),&a);
   return p.output(os);
 }
 
@@ -138,13 +139,13 @@ ComplexArea::output(std::ostream& os, const Area& a) const
 {
   using namespace std;
   os<<"<path fill-rule=\"nonzero\""<<a.attributes()<<" d=\"";
-  const std::list<Point> apoints =a.boundary().stroke(_bias);
+  const std::list<Point> apoints =a.boundary().stroke(bias);
   output_path_data(os,apoints.begin(),apoints.end());
   std::list<Area> voids =a.enclosed_areas();
   for(list<Area>::const_iterator v=voids.begin(); v!=voids.end(); ++v)
   {
     os<<" ";
-    const std::list<Point> vpoints =v->boundary().stroke(-_bias);
+    const std::list<Point> vpoints =v->boundary().stroke(-bias);
     output_path_data(os,vpoints.rbegin(),vpoints.rend());
   }
   os<<"\"/>\n";
@@ -159,7 +160,7 @@ std::ostream&
 Skeleton::output(std::ostream& os, const Area& a) const
 {
   os<<"<path"<<a.attributes()<<" d=\"";
-  const std::list<Boundary> bb =a.skeleton(this->_include_boundary);
+  const std::list<Boundary> bb =a.skeleton(this->include_boundary);
   for(std::list<Boundary>::const_iterator b=bb.begin(); b!=bb.end(); ++b)
   {
     const std::list<Edge*> edges =b->edges();
@@ -179,7 +180,7 @@ Skeleton::output(std::ostream& os, const Area& a) const
 std::ostream&
 BoundaryLine::output(std::ostream& os, const Boundary& b) const
 {
-  os<<Poly(b.stroke(_bias),b.is_closed(),&b);
+  os<<Poly(b.stroke(bias), b.is_closed(), &b);
   return os;
 }
 

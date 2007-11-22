@@ -34,6 +34,7 @@ namespace std {
   %template(AreaList)     std::list<hex::Area>;
   %template(PointList)    std::list<hex::Point>;
   %template(BoundaryList) std::list<hex::Boundary>;
+  %template(ElementList)  std::list<hex::svg::Element*>;
 }
 
 %ignore FIRETREE__HEX_H;
@@ -56,6 +57,8 @@ namespace std {
 };
 */
 
+// Lots of classes have str() member functions. This renames them so they work
+// with the Python str operator.
 %rename(__str__) str;
 
 %feature("autodoc","1");
@@ -63,3 +66,19 @@ namespace std {
 /* Parse the header file to generate wrappers */
 %include "hex.h"
 %include "hexsvg.h"
+
+namespace hex {
+  // Singles
+  %template(BoundaryLineSingle) svg::Single<svg::BoundaryLine>;
+  %template(ComplexAreaSingle)  svg::Single<svg::ComplexArea>;
+  %template(PathLineSingle)     svg::Single<svg::PathLine>;
+  %template(SimpleAreaSingle)   svg::Single<svg::SimpleArea>;
+  %template(SkeletonSingle)     svg::Single<svg::Skeleton>;
+  // Groups
+  %template(BoundaryLineGroup)  svg::Group<svg::BoundaryLine>;
+  %template(ComplexAreaGroup)   svg::Group<svg::ComplexArea>;
+  %template(PathLineGroup)      svg::Group<svg::PathLine>;
+  %template(SimpleAreaGroup)    svg::Group<svg::SimpleArea>;
+  %template(SkeletonGroup)      svg::Group<svg::Skeleton>;
+}
+

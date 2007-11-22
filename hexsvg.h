@@ -5,8 +5,6 @@
 
 #include "hex.h"
 
-#include <sstream>
-
 
 namespace hex {
 namespace svg {
@@ -76,19 +74,18 @@ template<class T_Adapter>
 class Single: public Element
 {
 public:
-  typedef typename T_Adapter::source_type source_type;
-  Single(const source_type& source, const T_Adapter& adapter)
-    : _source(source), _adapter(adapter)
-    {}
+  typedef typename T_Adapter::source_type  source_type;
+  const source_type  source;
+  const T_Adapter    adapter;
   /** This constructor only works in the adapter has a default constructor. */
-  Single(const source_type& source): _source(source), _adapter() {}
+  Single(const source_type& src): source(src), adapter() {}
+  Single(const source_type& src, const T_Adapter& adp)
+    : source(src), adapter(adp)
+    {}
   virtual std::ostream& output(std::ostream& os) const
     {
-      return _adapter.output(os,_source);
+      return this->adapter.output(os,this->source);
     }
-private:
-  const source_type&  _source;
-  const T_Adapter     _adapter;
 };
 
 
@@ -97,28 +94,27 @@ class Group: public Element, public Identity
 {
 public:
   typedef typename T_Adapter::source_type source_type;
+  const std::list<source_type>  sources;
+  const T_Adapter               adapter;
   /** Constructor for adapters with a default constructor. */
-  Group(const std::list<source_type>& sources)
-    : _sources(sources), _adapter()
+  Group(const std::list<source_type>& srcs)
+    : sources(srcs), adapter()
     {}
-  Group(const std::list<source_type>& sources, const T_Adapter& adapter)
-    : _sources(sources), _adapter(adapter)
+  Group(const std::list<source_type>& srcs, const T_Adapter& adp)
+    : sources(srcs), adapter(adp)
     {}
   std::ostream& output(std::ostream& os) const
     {
       os<<"<g"<<this->attributes()<<">\n";
-      for(typename std::list<source_type>::const_iterator s =_sources.begin();
-                                                          s!=_sources.end();
+      for(typename std::list<source_type>::const_iterator s =sources.begin();
+                                                          s!=sources.end();
                                                         ++s)
       {
-        _adapter.output(os,*s);
+        this->adapter.output(os,*s);
       }
       os<<"</g>\n";
       return os;
     }
-private:
-  const std::list<source_type>&  _sources;
-  const T_Adapter                _adapter;
 };
 
 
@@ -128,9 +124,9 @@ private:
 /** Draws the boundary around an area, without worrying about voids within. */
 class SimpleArea
 {
-  float _bias;
 public:
-  SimpleArea(float bias =0.0): _bias(bias) {}
+  float  bias;
+  SimpleArea(float bias_ =0.0): bias(bias_) {}
   typedef Area source_type;
   std::ostream& output(std::ostream& os, const Area& a) const;
 };
@@ -139,9 +135,9 @@ public:
 /** Draws the boundary around an area, taking account of voids within. */
 class ComplexArea 
 {
-  float _bias;
 public:
-  ComplexArea(float bias =0.0): _bias(bias) {}
+  float  bias;
+  ComplexArea(float bias_ =0.0): bias(bias_) {}
   typedef Area source_type;
   std::ostream& output(std::ostream& os, const Area& a) const;
 };
@@ -149,9 +145,9 @@ public:
 
 class Skeleton
 {
-  bool _include_boundary;
 public:
-  Skeleton(bool include_boundary =true): _include_boundary(include_boundary) {}
+  bool  include_boundary;
+  Skeleton(bool include_boundary_ =true): include_boundary(include_boundary_) {}
   typedef Area source_type;
   std::ostream& output(std::ostream& os, const Area& a) const;
 };
@@ -163,9 +159,9 @@ public:
 /** Draws a boundary line. */
 class BoundaryLine
 {
-  float _bias;
 public:
-  BoundaryLine(float bias =0.0): _bias(bias) {}
+  float  bias;
+  BoundaryLine(float bias_ =0.0): bias(bias_) {}
   typedef Boundary source_type;
   std::ostream& output(std::ostream& os, const Boundary& b) const;
 };
