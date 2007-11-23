@@ -4,6 +4,7 @@
 /* Includes the header in the wrapper code */
 #include "hex.h"
 #include "hexsvg.h"
+#include <sstream>
 %}
 
 %include <std_common.i>
@@ -45,17 +46,23 @@ namespace std {
 %ignore FIRETREE__HEXSVG_H;
 %ignore hex::svg::operator<<;
 
-/*
-%extend hex::Hex
+
+%extend hex::svg::Document
 {
-  std::string __str__(void)
+  std::string header_str(void)
   {
     std::ostringstream ss;
-    ss<<"hex("<< self->i <<","<< self->j <<")";
+    self->header(ss);
+    return ss.str();
+  }
+  std::string footer_str(void)
+  {
+    std::ostringstream ss;
+    self->footer(ss);
     return ss.str();
   }
 };
-*/
+%rename(_Document) Document;
 
 // Lots of classes have str() member functions. This renames them so they work
 // with the Python str operator.
@@ -82,3 +89,20 @@ namespace hex {
   %template(SkeletonGroup)      svg::Group<svg::Skeleton>;
 }
 
+%pythoncode %{
+class Document:
+  def __init__(self,grid):
+      self.grid=grid
+      self.document=_Document(grid)
+      self.elements=[]
+  def header(self):
+      return self.document.header_str()
+  def footer(self):
+      return self.document.footer_str()
+  def __str__(self):
+      result = self.document.header_str()
+      for e in self.elements:
+        result += str(e)
+      result += self.document.footer_str()
+      return result
+%}

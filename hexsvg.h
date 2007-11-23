@@ -23,8 +23,9 @@ Style style_dict(const std::string& s) throw(hex::invalid_argument);
 class Element
 {
 public:
+  virtual               ~Element(void) {}
   virtual std::ostream& output(std::ostream& os) const =0;
-  virtual ~Element(void) {}
+  std::string           str(void) const;
 };
 
 

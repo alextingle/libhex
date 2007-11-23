@@ -73,6 +73,9 @@ output_path_data(std::ostream& os, InputIterator first, InputIterator last)
 }
 
 
+//
+// Identity
+
 std::string
 Identity::attributes(void) const
 {
@@ -84,6 +87,18 @@ Identity::attributes(void) const
   if(!this->className.empty())
       result += std::string(" class=\"") + this->className + "\"";
   return result;
+}
+
+
+//
+// Element
+
+std::string
+Element::str(void) const
+{
+  std::ostringstream ss;
+  this->output(ss);
+  return ss.str();
 }
 
 
