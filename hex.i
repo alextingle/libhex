@@ -47,6 +47,14 @@ namespace std {
 %ignore hex::svg::operator<<;
 
 
+%extend hex::Hex
+{
+  /** Ensures that the == operator works correctly in Python. */
+  bool __eq__(const hex::Hex& right)
+  {
+    return( self==&right );
+  }
+};
 %extend hex::svg::Document
 {
   std::string header_str(void)
@@ -91,6 +99,7 @@ namespace hex {
 
 %pythoncode %{
 class Document:
+  '''Pure-Python implementation of the Document class.'''
   def __init__(self,grid):
       self.grid=grid
       self.document=_Document(grid)
