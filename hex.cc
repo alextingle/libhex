@@ -78,7 +78,7 @@ std::string
 Hex::str(void) const
 {
   std::ostringstream ss;
-  ss<< this->i <<","<< this->j;
+  ss<< this->i <<"_"<< this->j;
   return ss.str();
 }
 

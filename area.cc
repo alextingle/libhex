@@ -61,9 +61,8 @@ Area::skeleton(bool include_boundary) const
 
 
 std::list<hex::Path>
-Area::fillpaths(Hex* origin) const ///< EXPERIMENT
+Area::fillpaths(Hex* origin) const
 {
-  // Experiment
   // Try to calculate a path that fills area.
   std::set<Hex*> queue =_hexes;
   std::set<Hex*> seen;

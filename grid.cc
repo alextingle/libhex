@@ -57,13 +57,13 @@ Grid::to_area(void) const
 Hex*
 Grid::hex(const std::string& s) const throw(out_of_range,invalid_argument)
 {
-  // Parse strings like: / *[-+]?\d+, *[-+]?\d+([^\d].*)?/
-  // E.g.  '1,2' ' +2, 4' '2,4 # comment'
+  // Parse strings like: / *[-+]?\d+_ *[-+]?\d+([^\d].*)?/
+  // E.g.  '1_2' ' +2_ 4' '2_4 # comment'
   const char* buf =s.c_str();
   char* endptr =NULL;
   errno=0;
   int i =::strtol(buf,&endptr,10);
-  if(endptr==buf || *endptr!=',')
+  if(endptr==buf || *endptr!='_')
       throw hex::invalid_argument(s);
   buf =endptr+1;
   int j =::strtol(buf,&endptr,10);
@@ -79,7 +79,7 @@ std::set<Hex*>
 Grid::hexes(const std::string& s) const throw(out_of_range,invalid_argument)
 {
   // Parse string of space-separated hex coordinates.
-  // E.g. 1,2 2,3 3,4
+  // E.g. 1_2 2_3 3_4
   std::istringstream is(s);
   std::set<Hex*> result;
   while(is.good())
@@ -116,6 +116,7 @@ Grid::area(const std::string& s) const throw(out_of_range,invalid_argument)
     {
       std::list<Hex*> hexes =Path(start,steps).hexes();
       std::copy(hexes.begin(), hexes.end(), inserter(result,result.end()));
+      start=origin;
     }
     pos=next;
   }
