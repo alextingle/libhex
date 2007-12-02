@@ -49,11 +49,13 @@ namespace std {
 
 %extend hex::Hex
 {
-  /** Ensures that the == operator works correctly in Python. */
-  bool __eq__(const hex::Hex& right)
-  {
-    return( self==&right );
-  }
+  // Ensures that the == operator works correctly in Python.
+  %pythoncode %{
+    def __cmp__(self,other):
+      return cmp( self.__hash__(), other.__hash__() )
+    def __hash__(self):
+      return (self.i * 10000) ^ (self.j)
+  %}
 };
 %extend hex::svg::Document
 {
