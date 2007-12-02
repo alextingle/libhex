@@ -107,10 +107,21 @@ HEX.rotate = function(steps,i)
 //  HEX.Point
 
 /** X-Y coordinate class. */
-HEX.Point = function(x,y)
+HEX.Point = function(a,b)
 {
-  this.x = x? x: 0;
-  this.y = y? y: 0;
+  if(typeof a === 'string')
+  {
+    var piece =a.split(',');
+    if(piece.length!==2)
+      throw HEX.invalid_argument(a);
+    this.i=parseFloat(piece[0]);
+    this.j=parseFloat(piece[1]);
+  }
+  else
+  {
+    this.x = a? a: 0;
+    this.y = b? b: 0;
+  }
 }
 
 HEX.Point.prototype = {
@@ -118,7 +129,8 @@ HEX.Point.prototype = {
   add : function(p) { return new Point(this.x+p.x, this.y+p.y); },
   sub : function(p) { return new Point(this.x-p.x, this.y-p.y); },
   mul : function(v) { return new Point(this.x*v, this.y*v); },
-  div : function(v) { return new Point(this.x/v, this.y/v); }
+  div : function(v) { return new Point(this.x/v, this.y/v); },
+  toString : function() { return ''+this.x+','+this.y; }
 };
 
 
@@ -234,11 +246,7 @@ HEX.Hex = function(a,b)
   }
   else if(a instanceof HEX.Point)
   {
-    this.j = Math.floor( (a.y-HEX.K)/HEX.J );
-    if(this.j % 2)
-        this.i = Math.floor( a.x/HEX.I ) - 1; // odd rows
-    else
-        this.i = Math.floor( (a.x - HEX.I/2.0)/HEX.I ); // even rows
+    this._set_from_point(a);
   }
   else
   {
@@ -248,6 +256,47 @@ HEX.Hex = function(a,b)
 }
 
 HEX.Hex.prototype = {
+
+  /** Helper: set value from Point. */
+  _set_from_point : function(p)
+    {
+      // (Note I==1.0, so the factor of I has been omitted.)
+      var K_2 =HEX.K/2.0;
+      // BI is unit vector in direction B
+      var BIx = 0.5;
+      var BIy = 1.5 * HEX.K;
+      // CI is unit vector in direction C
+      var CIx = -BIx;
+      var CIy =  BIy;
+
+      // Calculate the 'simple' solution.
+      var x = p.x;
+      var y = p.y - HEX.K;
+      this.j = Math.round( y/HEX.J );
+      if(this.j % 2)
+          x -= 1.0; // odd rows
+      else
+          x -= 0.5; // even rows
+      this.i = Math.round( x );                                     //   x / I
+      // Now calculate the x,y offsets (in units of (I,J) )
+      var dx = x - this.i;                                          //   i * I
+      var dy = y - this.j * HEX.J;
+      // Only need more work if |dy| > K/2
+      if( dy < -K_2 || K_2 < dy )
+      {
+        var BId = (BIx * dx) + (BIy * dy);
+        var CId = (CIx * dx) + (CIy * dy);
+
+        if(      BId >  0.5 )
+                              HEX.go( this, HEX.B );
+        else if( BId < -0.5 )
+                              HEX.go( this, HEX.E );
+        else if( CId >  0.5 )
+                              HEX.go( this, HEX.C );
+        else if( CId < -0.5 )
+                              HEX.go( this, HEX.F );
+      }
+    },
 
   /** Get the centre of this hex as a HEX.Point object. */
   centre : function()
