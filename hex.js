@@ -219,6 +219,148 @@ HEX.grid = {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+//  HEX.Edge
+
+/** The interface between a hex and one of its six neighbours. Length K.
+ * Each hex has its OWN set of edges, so each hex-hex interface has TWO edges-
+ * one for each hex. */
+HEX.Edge = function(hex,direction)
+{
+  this.hex=hex;
+  this.direction=direction;
+}
+
+HEX.Edge.prototype = {
+
+  /** @return the complementary edge. */
+  complement : function()
+    {
+      var adjacent_hex =this.hex.go(this.direction);
+      if(adjacent_hex)
+          return adjacent_hex.edge(HEX.add(direction,3));
+      else
+          return null;
+    },
+
+  /** @return  TRUE if Edge v is next to this one. */
+  is_next : function(v)
+    {
+      // TRUE iff: &v == next_in(T) || next_in(F) || next_out(T) || next_out(F)
+      if( this.hex.valueOf() === v.hex.valueOf() )
+      {
+        return(  HEX.add(this.direction,1) === v.direction ||
+                 HEX.sub(this.direction,1) === v.direction    );
+      }
+      else
+      {
+        var vv =v.valueOf();
+        return(  vv === this.next_out(true ).valueOf() ||
+                 vv === this.next_out(false).valueOf()    );
+      }
+    },
+
+  /** @param clockwise  false [DEFAULT] - positive direction.
+   *                    true - negative (clockwise) direction.
+   *  @return  the next Edge object in *this* hex.
+   */
+  next_in : function(clockwise)
+    {
+      var one =(clockwise? -1: 1);
+      return this.hex.edge( HEX.add(this.direction,one) );
+    },
+
+  /** @param clockwise  false [DEFAULT] - positive direction.
+   *                    true - negative (clockwise) direction.
+   *  @return  the next Edge object in *adjacent* hex.
+   */
+  next_out : function(clockwise)
+    {
+      var one =(clockwise? -1: 1);
+      var c = this.hex.edge( HEX.add(this.direction,one) ).complement();
+      if(c)
+          return c.hex.edge( HEX.sub(this.direction,one) );
+      else
+          return null;
+    },
+
+  /** Helper function. Offsets Point p towards the start_point of edge in
+   *  direction d.
+   *  @return  new Point.
+   */
+  _corner_offset : function(p,d,bias)
+    {
+      var dx =0.0;
+      var dy =0.0;
+      switch(d)
+      {
+        case HEX.A: dx =  HEX.I/2.0; dy = -HEX.K/2.0; break;
+        case HEX.B: dx =  HEX.I/2.0; dy =  HEX.K/2.0; break;
+        case HEX.C: dx =        0.0; dy =  HEX.K    ; break;
+        case HEX.D: dx = -HEX.I/2.0; dy =  HEX.K/2.0; break;
+        case HEX.E: dx = -HEX.I/2.0; dy = -HEX.K/2.0; break;
+        case HEX.F: dx =        0.0; dy = -HEX.K    ; break;
+      }
+      if(bias)
+          return p.offset(dx*(1.0+bias),dy*(1.0+bias));
+      else
+          return p.offset(dx,dy);
+    },
+
+  /** @param bias       float [DEFAULT=1.0]
+   *  @param clockwise  false [DEFAULT] - positive direction.
+   *                    true - negative (clockwise) direction.
+   *  @return  new Point
+   */
+  start_point : function(bias,clockwise)
+    {
+      var dir =HEX.add( this.direction, (clockwise?1:0) );
+      return this._corner_offset( this.hex.centre(), dir, bias );
+    },
+
+  /** @param bias       float [DEFAULT=1.0]
+   *  @param clockwise  false [DEFAULT] - positive direction.
+   *                    true - negative (clockwise) direction.
+   *  @return  new Point
+   */
+  end_point : function(bias,clockwise)
+    {
+      return this.start_point( bias, (clockwise? false: true) );
+    },
+
+  /** @param next  adjacent Edge object.
+   *  @param bias  float [DEFAULT=1.0]
+   *  @return  new Point
+   */
+  join_point : function(next,bias)
+    {
+      if(!bias || this.hex.valueOf()===next.hex.valueOf())
+      {
+        if(HEX.inc(this.direction) === next.direction)
+            return this.end_point(bias);
+        else
+            return this.start_point(bias); // clockwise
+      }
+      else if(next.valueOf() === next_out().valueOf())
+      {
+        var p =this._corner_offset( this.hex.centre(), HEX.add(this.direction,2) );
+        return this._corner_offset( p, this.direction, bias );
+      }
+      else // clockwise
+      {
+        var p =this._corner_offset( this.hex.centre(), HEX.dec(this.direction) );
+        return this._corner_offset( p, HEX.inc(this.direction), bias );
+      }
+    },
+
+  valueOf : function()
+    {
+      return this.hex.valueOf()*10 + this.direction;
+    }
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
 //  HEX.Hex
 
 /** Hex location class.
@@ -296,6 +438,12 @@ HEX.Hex.prototype = {
         else if( CId < -0.5 )
                               HEX.go( this, HEX.F );
       }
+    },
+
+  /** Obtain this hex's Edge object in the given direction. */
+  edge : function(direction)
+    {
+      return new HEX.Edge(this,direction);
     },
 
   /** Get the centre of this hex as a HEX.Point object. */
