@@ -20,19 +20,18 @@ bool
 Edge::is_next(const Edge& v) const
 {
   // TRUE iff: &v == next_in(T) || next_in(F) || next_out(T) || next_out(F)
-  return(
-       ( _hex == v._hex &&
-         (_direction+1 == v._direction || _direction-1 == v._direction) )
-    || &v == next_out(true)
-    || &v == next_out(false)
-  );
+  if( _hex == v._hex )
+      return( _direction+1 == v._direction || _direction-1 == v._direction );
+  else
+      return( &v == next_out(true) || &v == next_out(false) );
 }
 
 
 Edge*
 Edge::next_in(bool clockwise) const
 {
-  return _hex->edge(_direction + (clockwise? -1: 1) );
+  int one =(clockwise? -1: 1);
+  return _hex->edge( _direction + one );
 }
 
 
