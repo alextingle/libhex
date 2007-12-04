@@ -125,11 +125,11 @@ HEX.Point = function(a,b)
 }
 
 HEX.Point.prototype = {
-  offset : function(dx,dy) { return new Point(this.x+dx, this.y+dy); },
-  add : function(p) { return new Point(this.x+p.x, this.y+p.y); },
-  sub : function(p) { return new Point(this.x-p.x, this.y-p.y); },
-  mul : function(v) { return new Point(this.x*v, this.y*v); },
-  div : function(v) { return new Point(this.x/v, this.y/v); },
+  offset : function(dx,dy) { return new HEX.Point(this.x+dx, this.y+dy); },
+  add : function(p) { return new HEX.Point(this.x+p.x, this.y+p.y); },
+  sub : function(p) { return new HEX.Point(this.x-p.x, this.y-p.y); },
+  mul : function(v) { return new HEX.Point(this.x*v, this.y*v); },
+  div : function(v) { return new HEX.Point(this.x/v, this.y/v); },
   toString : function() { return ''+this.x+','+this.y; }
 };
 
@@ -237,7 +237,7 @@ HEX.Edge.prototype = {
     {
       var adjacent_hex =this.hex.go(this.direction);
       if(adjacent_hex)
-          return adjacent_hex.edge(HEX.add(direction,3));
+          return adjacent_hex.edge(HEX.add(this.direction,3));
       else
           return null;
     },
@@ -473,9 +473,117 @@ HEX.Hex.prototype = {
 
   valueOf : function()
     {
-      return 10000*this.i + this.j;
+      return 10000*this.i + this.j + 1;
     }
 
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//  HEX.Area
+
+/** A connected set of hexes. */
+HEX.Area = function(hexset)
+{
+  if(!(hexset instanceof Array))
+    throw HEX.invalid_argument();
+  this.hexes = hexset;
+}
+
+HEX.Area.prototype = {
+
+  size     : function()  { return this.hexes.length; },
+  contains : function(h) { return HEX.set_contains(this.hexes,h); },
+
+  /** @return a HEX.Boundary for this area. */
+  boundary : function()
+    {
+      // Start with a random hex.
+      var h =this.hexes[0];
+      var i0 =h.i;
+      var j0 =h.j;
+      // Find an edge.
+      var i=0;
+      while(i<=i0 && !this.contains(HEX.grid.hex(i,j0)))
+          ++i;
+      var result =[]; // edges
+      result.push( HEX.grid.hex(i,j0).edge(HEX.D) );
+      // Follow the edge round.
+      while(true)
+      {
+        var e =result[ result.length-1 ].next_out();
+        if( !e || !this.contains(e.hex) )
+            e = result[ result.length-1 ].next_in();
+        if(e.valueOf() === result[0].valueOf())
+            break;
+        result.push(e);
+      }
+      return new HEX.Boundary(result);
+    },
+  // enclosed_areas()
+  // skeleton(include_boundary)
+
+  /** A list of one or more paths that include every hex in the area once. */
+  fillpaths : function(origin)
+    {
+      var result = []; // list of Paths
+      // Try to calculate a path that fills area.
+      var queue =this.hexes.slice(0); // copy
+      var seen = [];
+      var path = [];
+      var hex = origin? origin: queue[0];
+      var dir = HEX.F;
+      while(queue.length)
+      {
+        path.push( hex );
+        HEX.set_erase(queue,hex);
+        HEX.set_insert(seen,hex);
+        var d=HEX.add(dir,1);
+        while(true)
+        {
+          if(d===dir)
+          {
+            result.push( new HEX.Path(path) );
+            path = [];
+            hex = queue[0];
+            break;
+          }
+          var hd =hex.go(d);
+          if(HEX.set_contains(queue,hd) && !HEX.set_contains(seen,hd))
+          {
+            hex = hd;
+            dir = HEX.add(d,3);
+            break;
+          }
+          d=HEX.inc(d);
+        }
+      }
+      return result;
+    },
+
+  toString : function(origin)
+    {
+      origin = origin? origin: this.hexes[0];
+      var result = '';
+      var paths  =this.fillpaths(origin);
+      result += origin.toString();
+      for(var p =0, len=paths.length; p<len; ++p)
+      {
+        if(paths[p].hexes[0].valueOf() !== origin.valueOf())
+            result += ">" + HEX.steps(origin,paths[p].hexes[0]);
+        result += ":" + paths[p].steps();
+      }
+      return result;
+    },
+
+  go : function(steps,distance)
+    {
+      var result = [];
+      for(var h=0, len=this.hexes.length; h<len; ++i)
+        result.push( this.hexes[h].go(steps,distance) );
+      return new HEX.Area(result);
+    }
 };
 
 
@@ -551,85 +659,161 @@ HEX.Path.prototype = {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  HEX.Area
+//  HEX.Boundary
 
-/** A connected set of hexes. */
-HEX.Area = function(hexset)
+/** A sequence of adjacent edges. */
+HEX.Boundary = function(edges)
 {
-  if(!(hexset instanceof Array))
-    throw HEX.invalid_argument();
-  this.hexes = hexset;
+  this.edges=edges;
 }
 
-HEX.Area.prototype = {
+HEX.Boundary.prototype = {
 
-  size     : function()  { return this.hexes.length; },
-  contains : function(h) { return HEX.set_contains(this.hexes,h); },
+  /** in units of K */
+  length : function() { return this.edges.length; },
 
-  // boundary()
-  // enclosed_areas()
-  // skeleton(include_boundary)
-
-  /** A list of one or more paths that include every hex in the area once. */
-  fillpaths : function(origin)
+  /** @return  TRUE if this Boundary has no endpoints. */
+  is_closed : function()
     {
-      var result = []; // list of Paths
-      // Try to calculate a path that fills area.
-      var queue =this.hexes.slice(0); // copy
-      var seen = [];
-      var path = [];
-      var hex = origin? origin: queue[0];
-      var dir = HEX.F;
-      while(queue.length)
+      return( this.edges[0].is_next( this.edges[ this.edges.length-1 ] ) );
+    },
+
+  /** @return  TRUE if this Boundary contains a finite area. */
+  is_container : function()
+    {
+      if(this.is_closed())
       {
-        path.push( hex );
-        HEX.set_erase(queue,hex);
-        HEX.set_insert(seen,hex);
-        var d=HEX.add(dir,1);
-        while(true)
+        try {
+          var p1 =this.complement().to_path();
+          var p0 =this.to_path();
+          return( p0.length() < p1.length() );
+        }
+        catch(e) {
+          // If is_closed AND there is no complement, then the boundary must
+          // be at the very edge of the grid... it MUST be a container.
+          if(e instanceof HEX.exception && e.kind==='out_of_range')
+            return true;
+        }
+      }
+      return false;
+    },
+
+  /** @return  object of type HEX.Boundary that traces this in reverse. */
+  complement : function()
+    {
+      var result =[];
+      for(var e=0, len=this.edges.length; e<len; ++e)
+      {
+        var c =this.edges[e].complement();
+        if(c)
+            result.push( c );
+        else
+            throw HEX.out_of_range("Boundary complement out of range.");
+      }
+      return new HEX.Boundary(result);
+    },
+
+  /** @return  a HEX.Path object that follows this Boundary. */
+  to_path : function()
+    {
+      var result =[];
+      var last =null;
+      for(var e=0, len=this.edges.length; e<len; ++e)
+        if( !last || this.edges[e].hex.valueOf() != last )
         {
-          if(d===dir)
+          result.push( this.edges[e].hex );
+          last=this.edges[e].hex.valueOf();
+        }
+      return new HEX.Path(result);
+    },
+
+  /** @return  TRUE if this boundary is clockwise (normally FALSE). */
+  clockwise : function()
+    {
+      // Boundaries usually go round in a positive (anti-clockwise) direction.
+      if(this.edges.length > 1)
+      {
+        var e0 =this.edges[0];
+        var e1 =this.edges[1];
+        return( e0.valueOf()===e1.next_in().valueOf() ||
+                e0.valueOf()===e1.next_out().valueOf() );
+      }
+      return false;
+    },
+
+  toString : function()
+    {
+      var result =this.edges[0].hex.toString() + (this.clockwise()?"-":"+");
+      for(var e=0, len=this.edges.length; e<len; ++e)
+          result += HEX.to_char( this.edges[e].direction );
+      return result;
+    },
+
+  /** Calculate the set of points required to draw this boundary.
+   *
+   *  @param bias  float [DEFAULT=1.0]
+   *  @return      Array of HEX.Point objects
+   */
+  stroke : function(bias)
+    {
+      var result =[];
+      var cw =this.clockwise();
+      if(bias)
+      {
+        var last =null;
+        for(var e=0, len=this.edges.length; e<len; ++e)
+        {
+          if(last)
+              result.push( last.join_point(this.edges[e],bias) );
+          last = this.edges[e];
+        }
+        if(this.is_closed())
+        {
+          var p =last.join_point(this.edges[0],bias);
+          result.unshift( p );
+          result.push( p );
+        }
+        else
+        {
+          result.unshift( this.edges[0].start_point(bias,cw) );
+          result.push( last.end_point(bias,cw) );
+        }
+      }
+      else
+      {
+        if(this.edges.length)
+        {
+          var e =0;
+          result.push( this.edges[e].start_point(0.0,cw) );
+          while(e<this.edges.length)
           {
-            result.push( new HEX.Path(path) );
-            path = [];
-            hex = queue[0];
-            break;
+            result.push( this.edges[e].end_point(0.0,cw) );
+            ++e;
           }
-          var hd =hex.go(d);
-          if(HEX.set_contains(queue,hd) && !HEX.set_contains(seen,hd))
-          {
-            hex = hd;
-            dir = HEX.add(d,3);
-            break;
-          }
-          d=HEX.inc(d);
         }
       }
       return result;
     },
 
-  toString : function(origin)
+  /** Returns the HEX.Area enclosed by the boundary.
+   *  It is an error to call this function when is_closed()==false */
+  area : function()
     {
-      origin = origin? origin: this.hexes[0];
-      var result = '';
-      var paths  =this.fillpaths(origin);
-      result += origin.toString();
-      for(var p =0, len=paths.length; p<len; ++p)
+      if(!this.is_closed())
       {
-        if(paths[p].hexes[0].valueOf() !== origin.valueOf())
-            result += ">" + HEX.steps(origin,paths[p].hexes[0]);
-        result += ":" + paths[p].steps();
+        alert('It is an error to call HEX.Boundary.area() when the boundary'+
+              ' is not open.');
       }
-      return result;
-    },
-
-  go : function(steps,distance)
-    {
-      var result = [];
-      for(var h=0, len=this.hexes.length; h<len; ++i)
-        result.push( this.hexes[h].go(steps,distance) );
-      return new HEX.Area(result);
+      var beyond =[];
+      var queue =[];
+      for(var e=0, len=this.edges.length; e<len; ++e)
+      {
+        queue.insert(  this.edges[e].hex );
+        beyond.insert( this.edges[e].hex.go( this.edges[e].direction ) );
+      }
+      return HEX.fill(beyond,queue);
     }
+
 };
 
 
@@ -926,7 +1110,7 @@ HEX.set_str = function(a)
  *  @param beyond  Array of HEX.Hex objects, that delimit the area to be filled.
  *  @param a       Array of HEX.Hex objects, that delimit the area to be filled.
  *                 OR a single HEX.Hex object.
- *  @return        Array of HEX.Hex objects
+ *  @return        HEX.Area object
  */
 HEX.fill = function(beyond, a)
 {
@@ -948,7 +1132,7 @@ HEX.fill = function(beyond, a)
       }
     }
   }
-  return result;
+  return new HEX.Area(result);
 }
 
 
@@ -977,7 +1161,7 @@ HEX._extract_connected_set = function(s)
 /** Find all of the Areas (connected sets) in s.
  *
  *  @param s  Sorted set of unique HEX.Hex objects.
- *  @return   Array of sorted sets of unique HEX.Hex objects.
+ *  @return   Array of HEX.Area objects.
  */
 HEX.areas = function(s)
 {
@@ -985,7 +1169,8 @@ HEX.areas = function(s)
   var result = [];
   while(unallocated.length>0)
   {
-    result.push( HEX._extract_connected_set(unallocated) );
+    var area =new HEX.Area( HEX._extract_connected_set(unallocated) );
+    result.push( area );
   }
   return result;
 }
