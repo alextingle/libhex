@@ -487,7 +487,7 @@ HEX.Hex.prototype = {
 HEX.Area = function(hexset)
 {
   if(!(hexset instanceof Array))
-    throw HEX.invalid_argument();
+    throw HEX.invalid_argument(hexset);
   this.hexes = hexset;
 }
 
@@ -521,8 +521,33 @@ HEX.Area.prototype = {
       }
       return new HEX.Boundary(result);
     },
-  // enclosed_areas()
-  // skeleton(include_boundary)
+
+  enclosed_areas : function()
+    {
+      var a =this.boundary().area();
+      return HEX.areas( HEX.set_difference( a.hexes, this.hexes ) );
+    },
+
+  /** For drawing the structure. If include_boundary is TRUE, then the
+   *  last item in the list is the external boundary of the area.
+   *
+   *  @return  Array of Boundary objects.
+   */
+  skeleton : function(include_boundary)
+    {
+      var result =[];
+      for(var h=0, len=this.hexes.length; h<len; ++h)
+      {
+        var edges =[];
+        edges.push( this.hexes[h].edge(A) );
+        edges.push( this.hexes[h].edge(B) );
+        edges.push( this.hexes[h].edge(C) );
+        result.push( new HEX.Boundary(edges) );
+      }
+      if(include_boundary)
+          result.push(this.boundary());
+      return result;
+    },
 
   /** A list of one or more paths that include every hex in the area once. */
   fillpaths : function(origin)
