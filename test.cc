@@ -37,14 +37,14 @@ int main()
   ga.style="fill:none; stroke:gray; stroke-width:0.01";
   d.elements.push_back( new hex::svg::Single<hex::svg::Skeleton>(ga,true) );
 
-  hex::Path p =g.path("3,1:ABCDBBAFE");
+  hex::Path p =g.path("3_1:ABCDBBAFE");
   p.style="fill:none;stroke:#9f9; stroke-width:0.08; marker-end:url(#Triangle)";
   d.elements.push_back( new hex::svg::Single<hex::svg::PathLine>(p) );
   
   list<Edge*> le =p.to_area().boundary().edges();//.complement();
   le.pop_back();
   Boundary pb(le);
-  pb =g.boundary( "4,2+DEFEFAFAFAFABABCBCDCDCDEFEDC" );
+//  pb =g.boundary( "4_2+DEFEFAFAFAFABABCBCDCDCDEFEDC" );
   pb.style="fill:none; stroke:#800; stroke-width:0.04; marker-end:url(#Triangle)";
   cerr<<pb.str()<<" "<<pb.is_closed()<<endl;
   d.elements.push_back( new hex::svg::Single<hex::svg::BoundaryLine>(pb,-0.3) );

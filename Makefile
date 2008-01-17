@@ -1,6 +1,8 @@
+CPPFLAGS += \
+ -I$(PYINC) \
+
 CXXFLAGS += \
  -Wall \
- -I/usr/include/python2.4 \
  -fno-strict-aliasing \
  -fPIC \
 
@@ -28,14 +30,31 @@ endif
 
 LDFLAGS  += $(CXXFLAGS)
 
-SONAME := libhex.so
+# Use python -V to automatically detect the python version
+PYVER := $(shell python -V 2>&1 | sed 's/.* \([1-9][.][0-9]\).*/\1/')
+PYINC := /usr/include/python$(PYVER)
+
+# Use uname to automatically detect Mac builds.
+PLATFORM := $(shell uname -a | sed 's/.*Darwin.*/mac/')
+
+ifeq ($(PLATFORM),mac)
+  SOEXT := .dylib
+  # Build a shared object library: Use as $(call MakeSharedLib,OBJECTS,SONAME)
+  MakeSharedLib = \
+    MACOSX_DEPLOYMENT_TARGET=10.3 \
+    g++ -dynamiclib -undefined dynamic_lookup $(LDFLAGS) -o $(2) $(1)
+else
+  SOEXT= .so
+  # Build a shared object library: Use as $(call MakeSharedLib,OBJECTS,SONAME)
+  MakeSharedLib = g++ -shared $(LDFLAGS) -o $(2) $(1) 
+endif
 
 
 .PHONY: all
 all: lib solib pylib test
 
 deps.mk: $(wildcard *.cc) $(wildcard *.h)
-	g++ -MM $(wildcard *.cc) > $@
+	g++ $(CPPFLAGS) -MM $(wildcard *.cc) > $@
 
 include deps.mk
 
@@ -48,18 +67,18 @@ libhex.a: $(patsubst %.cc,%.o,$(SOURCES))
 	ar rus $@ $^
 
 .PHONY: solib
-solib: libhex.so
-libhex.so: $(patsubst %.cc,%.o,$(SOURCES))
-	g++ -shared -o $@ $(LDFLAGS) $^
+solib: libhex$(SOEXT)
+libhex$(SOEXT): $(patsubst %.cc,%.o,$(SOURCES))
+	$(call MakeSharedLib,$^,$@)
 
 .PHONY: pylib
 pylib: _hex.so
 _hex.so: hex_wrap.o $(patsubst %.cc,%.o,$(SOURCES))
-	g++ -shared $(LDFLAGS) $^ $(LIBS) -o $@
+	$(call MakeSharedLib,$^ $(LIBS),$@)
 
 test: test.o solib
 	g++ $(LDFLAGS) $< $(LIBS) -o $@ -L. -lhex
 
 .PHONY: clean
 clean:
-	rm -f *.o *.so *.a test hex_wrap.cc hex.py *.pyc
+	rm -f *.o *$(SOEXT) *.a test hex_wrap.cc hex.py *.pyc
