@@ -1,3 +1,56 @@
+/*                            Package   : libhex
+ * hex.h                      Created   : 2007/10/11
+ *                            Author    : Alex Tingle
+ *
+ *    Copyright (C) 2007-2008, Alex Tingle.
+ *
+ *    This file is part of the libhex application.
+ *
+ *    libhex is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation; either
+ *    version 2.1 of the License, or (at your option) any later version.
+ *
+ *    libhex is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Lesser General Public
+ *    License along with this library; if not, write to the Free Software
+ *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+/** @mainpage libhex - a library for manipulating hexagonal grids.
+ *
+ * Output to Scalable Vector Graphics (SVG) is supported. SVG can be viewed
+ * directly in most modern web-browers, or converted to PNG or JPG using
+ * readily-available utilities.
+ * 
+ * By default, the grid is orientated with the main "x" axis horizontal ('West'
+ * to 'East). The six directions are labelled A to F anti-clockwise. Direction
+ * 'A' is 'East' along the x-axis. 'B' is 'North-East' and so-on.
+ *
+ * If you prefer a different scheme (perhaps with the main axis running 'South'
+ * to 'North', or with clockwise as the positive direction) then simply use
+ * SVG transformations to rotate or mirror the grid as necessary.
+ *
+ * libhex is written in C++, and the main interface is in that language. A
+ * Python interface is implemented using SWIG. Other language interfaces (Ruby,
+ * TCL, whatever) could also be easily achieved with SWIG. If you do any work in
+ * these other languages, then let me know.
+ *
+ * A JavaScript version of the library is also available (hex.js). This is a
+ * 100% re-implementation in JavaScript. It enables Ajax applications to
+ * manipulate the SVG directly.
+ *
+ * Most libhex objects (Hexes, Areas, Paths) can be represented as simple
+ * text-strings. This makes it easy to store them, or for client-server (Ajax)
+ * applications to communicate about them in high-level terms. See the
+ * documentation for details.
+ *
+ * Author: Alex Tingle <alex.libhex@firetree.net>
+ */
 
 #ifndef FIRETREE__HEX_H
 #define FIRETREE__HEX_H 1
@@ -14,13 +67,15 @@
 
 #define HEX_PARANOID_CHECKS
 
-
+/** Library for manipulating hexagonal grids.
+ *  Supports arbitrary areas and paths. */
 namespace hex {
 
 
 //
 // Exceptions
 
+/** Base class for hex exceptions. */
 class exception: public std::exception
 {
 public:
@@ -58,7 +113,9 @@ const Distance K =1.0/M_SQRT3;
 //
 // Direction
 
-enum Direction { A=0,B=1,C=2,D=3,E=4,F=5 };
+/** The six directions are labelled A to F anti-clockwise.
+ *  Direction 'A' is 'East' along the x-axis. 'B' is 'North-East' and so-on. */
+enum Direction { /** ---> */ A=0, B=1, C=2, /** <--- */ D=3, E=4, F=5 };
 const int DIRECTIONS =6;
 
 Direction to_direction(char c) throw(hex::invalid_argument);
@@ -127,7 +184,8 @@ struct Point
   std::string str(void) const;
 };
 
-
+/** A square field of hexagons that form the universe in which the other
+ *  objects exist. */
 class Grid
 {
   typedef std::vector<Hex*> Row;
