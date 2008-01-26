@@ -129,11 +129,11 @@ Element::str(void) const
 // Poly
 
 Poly::Poly(const std::list<Point>& pp, bool closed, const Identity* identity)
-  :_first(pp.begin()), _last(pp.end()), _closed(closed), _identity(identity)
+  :_points(pp), _closed(closed), _identity(identity)
 {
-  assert(_first!=_last);
+  assert(!_points.empty());
   if(closed)
-      --_last;
+      _points.pop_back();
 }
 
 
@@ -147,11 +147,11 @@ Poly::output(std::ostream& os) const
   if(_identity)
       os<<_identity->attributes();
   os<<" points=\"";
-  for(std::list<Point>::const_iterator pos=_first; pos!=_last; ++pos)
+  for(std::list<Point>::const_iterator p=_points.begin(); p!=_points.end(); ++p)
   {
-    if(pos!=_first)
+    if(p!=_points.begin())
        os<<" ";
-    os<<pos->x<<","<<pos->y;
+    os<< p->x <<","<< p->y;
   }
   os<<"\"/>\n";
   return os;

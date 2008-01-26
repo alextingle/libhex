@@ -31,7 +31,15 @@
 namespace hex {
 
 /** Output hex:: objects as Scalable Vector Graphics (SVG) - which you can
- *  easily convert to PNG or JPG. */
+ *  easily convert to PNG or JPG.
+ *
+ *  The SVG document is represented as a list of hex::svg::Element objects.
+ *  Each element knows how to draw itself onto the SVG canvas.
+ *
+ *  Normal hex:: objects (like hex::Area or hex::Path) don't know how to draw
+ *  themselves as SVG. To get a hex::svg::Element, the object must be
+ *  installed into an appropriate "adapter" object.
+ */
 namespace svg {
 
 
@@ -73,7 +81,7 @@ operator<<(std::ostream& os, hex::Point p)
  *  whether they are closed or not. */
 class Poly: public Element
 {
-  std::list<Point>::const_iterator _first, _last;
+  std::list<Point>                 _points;
   bool                             _closed;
   const Identity*                  _identity; 
 public:
@@ -96,6 +104,16 @@ public:
 //
 // Generic elements. Instantiate with an adapter.
 
+/** A simple element that uses an adapter-object to draw a single object.
+ *  Drawing style is determined solely by the hex::Identity properties of the
+ *  object.
+ *  For example:
+ *  - Single< SimpleArea >  - one Area, drawn without voids.
+ *  - Single< ComplexArea > - one Area, drawn with voids.
+ *  - Single< Skeleton >    - one Area, drawn as a grid-skeleton.
+ *  - Single< PathLine >    - one Path.
+ *  - Single< Boundary >    - one Boundary.
+ */
 template<class T_Adapter>
 class Single: public Element
 {
@@ -103,7 +121,7 @@ public:
   typedef typename T_Adapter::source_type  source_type;
   const source_type  source;
   const T_Adapter    adapter;
-  /** This constructor only works in the adapter has a default constructor. */
+  /** This constructor only works if the adapter has a default constructor. */
   Single(const source_type& src): source(src), adapter() {}
   Single(const source_type& src, const T_Adapter& adp)
     : source(src), adapter(adp)
@@ -115,6 +133,19 @@ public:
 };
 
 
+/** An element that uses an adapter-object to draw a group of similar objects.
+ *  Overall drawing style is determined by the hex::Identity properties of the
+ *  Group object. This may be over-ridden by the properties of individual
+ *  contained objects.
+ *
+ *  Use the 'sources' list member to set which objects belong to the group. 
+ *  
+ *  For example:
+ *  - Group< SimpleArea >  - a group of Areas, drawn without voids.
+ *  - Group< ComplexArea > - a group of Areas, drawn with voids.
+ *  - Group< PathLine >    - a group of Paths.
+ *  - Group< Boundary >    - a group of Boundaries.
+ */
 template<class T_Adapter>
 class Group: public Element, public Identity
 {

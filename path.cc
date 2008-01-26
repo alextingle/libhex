@@ -91,7 +91,7 @@ path(Hex* start, const std::string& steps)
         else if(*steps.rbegin()=='?' || repeat)
             return hexes; // bail out instead of throwing
         else
-            throw hex::out_of_range(std::string("path:")+steps);
+            throw hex::out_of_range(start->str()+":"+steps);
     } while(repeat);
   }
   return hexes;
