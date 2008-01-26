@@ -56,6 +56,7 @@ namespace std {
   %template(HexList)      std::list<hex::Hex*>;
   %template(EdgeList)     std::list<hex::Edge*>;
   %template(AreaList)     std::list<hex::Area>;
+  %template(PathList)     std::list<hex::Path>;
   %template(PointList)    std::list<hex::Point>;
   %template(BoundaryList) std::list<hex::Boundary>;
   %template(ElementList)  std::list<hex::svg::Element*>;

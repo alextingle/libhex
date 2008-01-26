@@ -13,8 +13,6 @@ using namespace std;
 
 int main()
 {
-  using namespace hex;
-  
   // Make a 10x10 grid of hexagons. This is the universe in which our other
   // objects will live.
   hex::Grid grid(10,10);
@@ -89,7 +87,7 @@ int main()
   area_list.push_back( hex::Area(hex_3) );
   // You can over-ride styles for individual group members.
   area_4.style="fill:lightgreen; stroke:darkgreen";
-  area_list.push_back(area_4);
+  area_list.push_back( area_4 );
   // Now put the list of Areas into a Group.
   hex::svg::Group<hex::svg::SimpleArea> area_group( area_list, -0.1 );
   // The default style for all group members is set here.
@@ -114,10 +112,11 @@ int main()
   // constituent Hexes, as a faint skeleton, on top of all the other
   // objects.
 
-  Area grid_area =grid.to_area();
+  hex::Area grid_area =grid.to_area();
   grid_area.style="fill:none; stroke:gray; stroke-width:0.01";
   hex::svg::Single<hex::svg::Skeleton> skeleton(grid_area,true);
   doc.elements.push_back( &skeleton );
+
 
   // Finally, write the SVG to standard output.
 

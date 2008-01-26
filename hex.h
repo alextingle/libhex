@@ -314,6 +314,7 @@ public:
   std::string             steps(void) const;
   std::string             str(void) const;
 public: // construction
+  Path(void): _hexes() {} ///< Required for list<Path>
   Path(const std::list<Hex*>& hexes): _hexes(hexes) {}
   /** A Path starting at start, and proceeding in directions from steps. */
   Path(Hex* start, const std::string& steps)
