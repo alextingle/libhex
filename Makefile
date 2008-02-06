@@ -101,6 +101,10 @@ _hex.so: hex_wrap.o $(patsubst %.cc,%.o,$(SOURCES))
 test: test.o solib
 	g++ $(LDFLAGS) $< $(LIBS) -o $@ -L. -lhex
 
+install: solib
+	install libhex$(SOEXT) /usr/local/lib
+	install hex.h hexsvg.h /usr/local/include
+
 .PHONY: clean
 clean:
 	rm -f *.o *$(SOEXT) *.a test hex_wrap.cc hex.py *.pyc

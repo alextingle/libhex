@@ -722,7 +722,8 @@ HEX.Boundary.prototype = {
   /** @return  TRUE if this Boundary has no endpoints. */
   is_closed : function()
     {
-      return( this.edges[0].is_next( this.edges[ this.edges.length-1 ] ) );
+      return( this.edges.length>2 &&
+              this.edges[0].is_next( this.edges[ this.edges.length-1 ] ) );
     },
 
   /** @return  TRUE if this Boundary contains a finite area. */

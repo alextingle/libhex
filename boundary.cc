@@ -38,7 +38,7 @@ Boundary::length(void) const ///< in units of K
 bool
 Boundary::is_closed(void) const
 {
-  return( _edges.front()->is_next( *_edges.back() ) );
+  return( _edges.size()>2 && _edges.front()->is_next( *_edges.back() ) );
 }
 
 

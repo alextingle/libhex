@@ -108,9 +108,9 @@ public:
 typedef double Distance;
 
 const Distance M_SQRT3 =1.73205080756887729352744634150587236; // sqrt(3)
-const Distance I =1.0;
-const Distance J =M_SQRT3/2.0;
-const Distance K =1.0/M_SQRT3;
+const Distance I =1.0;         ///< Distance between centres of adjacent hexes.
+const Distance J =M_SQRT3/2.0; ///< Distance between adjacent hex rows.
+const Distance K =1.0/M_SQRT3; ///< Length of hex's edge.
 
 //
 // Direction
