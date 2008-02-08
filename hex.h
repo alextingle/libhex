@@ -183,6 +183,8 @@ struct Point
   Point operator-(const Point& p) const { return Point(x-p.x,y-p.y); }
   Point operator*(double v) const { return Point(x*v,y*v); }
   Point operator/(double v) const { return Point(x/v,y/v); }
+  bool operator==(const Point& p) const { return(x==p.x && y==p.y); }
+  bool operator!=(const Point& p) const { return !operator==(p); }
   std::string str(void) const;
 };
 

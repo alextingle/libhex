@@ -77,6 +77,29 @@ style_dict(const std::string& s) throw(hex::invalid_argument)
 }
 
 
+/** Helper function - append a new relative point to a path.
+ *  @param cmd   in/out current command letter
+ *  @param p     in/out current path point
+ *  @param cmd1  desired command letter
+ *  @param p1    desired point
+ */
+std::string path_append(char& cmd, Point& p, char cmd1, const Point& p1)
+{
+  std::ostringstream ss;
+  if(p != p1)
+  {
+    if(cmd != cmd1)
+    {
+      ss<<" "<<cmd1;
+      cmd=cmd1;
+    }
+    ss<<" "<<(p1-p);
+    p=p1;
+  }
+  return ss.str();
+}
+
+
 /** Helper function. */
 template<class InputIterator>
 std::ostream&
@@ -84,13 +107,9 @@ output_path_data(std::ostream& os, InputIterator first, InputIterator last)
 {
   assert(first!=last);
   --last;
-  for(InputIterator p =first; p!=last; ++p)
-  {
-    if(p==first)
-        os<<"M "<<(*p);
-    else
-        os<<" L "<<(*p);
-  }
+  os<<"M "<<(*first)<<" L";
+  for(InputIterator p =++first; p!=last; ++p)
+      os<<" "<<(*p);
   os<<" Z";
   return os;
 }
@@ -199,13 +218,18 @@ Skeleton::output(std::ostream& os, const Area& a) const
 {
   os<<"<path"<<a.attributes()<<" d=\"";
   const std::list<Boundary> bb =a.skeleton(this->include_boundary);
+  Point curr =bb.front().edges().front()->start_point();
+  os<<"M "<<curr;
+  char cmd ='\0';
   for(std::list<Boundary>::const_iterator b=bb.begin(); b!=bb.end(); ++b)
   {
     const std::list<Edge*> edges =b->edges();
     assert(!edges.empty());
-    os<<"M "<<edges.front()->start_point();
+    os<<path_append(cmd,curr,'m',edges.front()->start_point());
     for(std::list<Edge*>::const_iterator e=edges.begin(); e!=edges.end(); ++e)
-        os<<"L "<<(**e).end_point();
+    {
+      os<<path_append(cmd,curr,'l',(**e).end_point());
+    }
   }
   os<<"\"/>\n";
   return os;
@@ -259,8 +283,9 @@ Document::header(std::ostream& os) const
       "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
     "<svg width=\"100%\" height=\"100%\" viewBox=\""
     "0 0 "<<(width+hmargin*2.0)<<" "<<(height+vmargin*2.0)<<
-    "\" version=\"1.1\" "
-      "xmlns=\"http://www.w3.org/2000/svg\">\n"
+    "\" version=\"1.1\""
+      " xmlns=\"http://www.w3.org/2000/svg\""
+      " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 
     "<defs>\n"
     "<marker id=\"Triangle\""
@@ -270,7 +295,7 @@ Document::header(std::ostream& os) const
     " orient=\"auto\">\n"
     "<path d=\"M 0 0 L 10 5 L 0 10 z\" />\n"
     "</marker>\n"
-    "</defs>\n" 
+    "</defs>\n"
 
     "<g transform=\"translate("<<hmargin<<" "
       <<(height+vmargin)<<") scale(1 -1)\">\n"
