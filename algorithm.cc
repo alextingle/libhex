@@ -192,6 +192,28 @@ set_str(const std::set<Hex*>& a)
 }
 
 
+bool
+bounding_box(const std::set<Hex*>& a, int& i0, int& j0, int& i1, int& j1)
+{
+  for(std::set<Hex*>::const_iterator h=a.begin(); h!=a.end(); ++h)
+  {
+    if(h==a.begin())
+    {
+      i0 = i1 = (**h).i;
+      j0 = j1 = (**h).j;
+    }
+    else
+    {
+      i0 = std::min(i0,(**h).i);
+      j0 = std::min(j0,(**h).j);
+      i1 = std::max(i1,(**h).i);
+      j1 = std::max(j1,(**h).j);
+    }
+  }
+  return !a.empty();
+}
+
+
 Area
 fill(const std::set<Hex*>& beyond, Hex* h)
 {

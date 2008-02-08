@@ -405,6 +405,11 @@ std::string
 set_str(const std::set<Hex*>& a);
 
 
+/** Calculate a bounding box for hex-set a. Returns FALSE if a is empty. */
+bool
+bounding_box(const std::set<Hex*>& a, int& i0, int& j0, int& i1, int& j1);
+
+
 /** Calc. the max. area that contains h, but does not intersect beyond. */
 Area
 fill(const std::set<Hex*>& beyond, Hex* h);
