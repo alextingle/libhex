@@ -280,7 +280,14 @@ Document::header(std::ostream& os) const
   os<<
     "<?xml version=\"1.0\" standalone=\"no\"?>\n"
     "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
-      "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
+      "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
+  for(std::list<std::string>::const_iterator s =this->stylesheets.begin();
+                                             s!=this->stylesheets.end();
+                                           ++s)
+  {
+    os<<"<?xml-stylesheet href=\""<<(*s)<<"\" type=\"text/css\"?>\n";
+  }
+  os<<
     "<svg width=\"100%\" height=\"100%\" viewBox=\""
     "0 0 "<<(width+hmargin*2.0)<<" "<<(height+vmargin*2.0)<<
     "\" version=\"1.1\""
@@ -294,12 +301,17 @@ Document::header(std::ostream& os) const
     " markerWidth=\"4\" markerHeight=\"3\""
     " orient=\"auto\">\n"
     "<path d=\"M 0 0 L 10 5 L 0 10 z\" />\n"
-    "</marker>\n"
+    "</marker>\n";
+  for(std::list<std::string>::const_iterator d =this->defs.begin();
+                                             d!=this->defs.end();
+                                           ++d)
+  {
+    os<<(*d)<<"\n";
+  }
+  os<<
     "</defs>\n"
-
     "<g transform=\"translate("<<hmargin<<" "
-      <<(height+vmargin)<<") scale(1 -1)\">\n"
-  ;
+      <<(height+vmargin)<<") scale(1 -1)\">\n";
 }
 
 

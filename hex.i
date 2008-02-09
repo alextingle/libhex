@@ -52,6 +52,7 @@
 
 namespace std {
   %template(Style)        std::map<std::string,std::string>;
+  %template(StringList)   std::list<std::string>;
   %template(Set)          std::set<hex::Hex*>;
   %template(HexList)      std::list<hex::Hex*>;
   %template(EdgeList)     std::list<hex::Edge*>;
@@ -79,6 +80,16 @@ namespace std {
       return cmp( self.__hash__(), other.__hash__() )
     def __hash__(self):
       return (self.i * 10000) ^ (self.j)
+  %}
+};
+%extend hex::Edge
+{
+  // Ensures that the == operator works correctly in Python.
+  %pythoncode %{
+    def __cmp__(self,other):
+      return cmp( self.__hash__(), other.__hash__() )
+    def __hash__(self):
+      return 10*hash(self.hex()) + self.direction()
   %}
 };
 %extend hex::svg::Document
@@ -129,6 +140,8 @@ class Document:
   def __init__(self,grid):
       self.grid=grid
       self.document=_Document(grid)
+      self.stylesheets=self.document.stylesheets
+      self.defs=self.document.defs
       self.elements=[]
   def header(self):
       return self.document.header_str()

@@ -244,7 +244,9 @@ class Document
 {
   const Grid&         _grid;
 public:
-  std::list<Element*>  elements;
+  std::list<std::string>  stylesheets; ///< List of stylesheets to import.
+  std::list<std::string>  defs; ///< Fragments insert into the <defs> element.
+  std::list<Element*>     elements; ///< Elements rendered in the document body.
   Document(const Grid& grid): _grid(grid) {}
   void           header(std::ostream& os) const;
   void           footer(std::ostream& os) const;
