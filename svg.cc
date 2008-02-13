@@ -131,70 +131,18 @@ Identity::attributes(void) const
   return result;
 }
 
-
 //
-// Element
+// Draw functions
 
-std::string
-Element::str(void) const
+std::string draw_simple_area(const Area& a, float bias)
 {
-  std::ostringstream ss;
-  this->output(ss);
-  return ss.str();
+  return draw_poly(a.boundary().stroke(bias),true,&a);
 }
 
-
-//
-// Poly
-
-Poly::Poly(const std::list<Point>& pp, bool closed, const Identity* identity)
-  :_points(pp), _closed(closed), _identity(identity)
-{
-  assert(!_points.empty());
-  if(closed)
-      _points.pop_back();
-}
-
-
-std::ostream&
-Poly::output(std::ostream& os) const
-{
-  if(_closed)
-      os<<"<polygon";
-  else
-      os<<"<polyline";
-  if(_identity)
-      os<<_identity->attributes();
-  os<<" points=\"";
-  for(std::list<Point>::const_iterator p=_points.begin(); p!=_points.end(); ++p)
-  {
-    if(p!=_points.begin())
-       os<<" ";
-    os<< p->x <<","<< p->y;
-  }
-  os<<"\"/>\n";
-  return os;
-}
-
-
-//
-// SimpleArea
-
-std::ostream&
-SimpleArea::output(std::ostream& os, const Area& a) const
-{
-  Polygon p(a.boundary().stroke(bias),&a);
-  return p.output(os);
-}
-
-
-//
-// ComplexArea
-
-std::ostream&
-ComplexArea::output(std::ostream& os, const Area& a) const
+std::string draw_complex_area(const Area& a, float bias)
 {
   using namespace std;
+  std::ostringstream os;
   os<<"<path fill-rule=\"nonzero\""<<a.attributes()<<" d=\"";
   const std::list<Point> apoints =a.boundary().stroke(bias);
   output_path_data(os,apoints.begin(),apoints.end());
@@ -206,18 +154,14 @@ ComplexArea::output(std::ostream& os, const Area& a) const
     output_path_data(os,vpoints.rbegin(),vpoints.rend());
   }
   os<<"\"/>\n";
-  return os;
+  return os.str();
 }
 
-
-//
-// Skeleton
-
-std::ostream&
-Skeleton::output(std::ostream& os, const Area& a) const
+std::string draw_skeleton(const Area& a, bool include_boundary)
 {
+  std::ostringstream os;
   os<<"<path"<<a.attributes()<<" d=\"";
-  const std::list<Boundary> bb =a.skeleton(this->include_boundary);
+  const std::list<Boundary> bb =a.skeleton(include_boundary);
   Point curr =bb.front().edges().front()->start_point();
   os<<"M "<<curr;
   char cmd ='\0';
@@ -232,27 +176,19 @@ Skeleton::output(std::ostream& os, const Area& a) const
     }
   }
   os<<"\"/>\n";
-  return os;
+  return os.str();
 }
 
 
-//
-// BoundaryLine
-
-std::ostream&
-BoundaryLine::output(std::ostream& os, const Boundary& b) const
+std::string draw_boundary(const Boundary& b, float bias)
 {
-  os<<Poly(b.stroke(bias), b.is_closed(), &b);
-  return os;
+  return draw_poly(b.stroke(bias), b.is_closed(), &b);
 }
 
 
-//
-// PathLine
-
-std::ostream&
-PathLine::output(std::ostream& os, const Path& p) const
+std::string draw_path(const Path& p)
 {
+  std::ostringstream os;
   const std::list<Hex*>& hexes =p.hexes();
   assert(!hexes.empty());
   if(hexes.size()>1) // Nothing to draw if there is only one hex in the path.
@@ -261,9 +197,38 @@ PathLine::output(std::ostream& os, const Path& p) const
     for(std::list<Hex*>::const_iterator h =hexes.begin(); h!=hexes.end(); ++h)
         points.push_back( (**h).centre() );
     bool is_closed =( hexes.front()==hexes.back() );
-    os<<Poly(points,is_closed,&p);
+    os<<draw_poly(points,is_closed,&p);
   }
-  return os;
+  return os.str();
+}
+
+
+
+//
+// Poly
+
+std::string
+draw_poly(std::list<Point> points, bool closed, const Identity* identity)
+{
+  assert(!points.empty());
+  std::ostringstream os;
+  if(closed)
+      points.pop_back();
+  if(closed)
+      os<<"<polygon";
+  else
+      os<<"<polyline";
+  if(identity)
+      os<<identity->attributes();
+  os<<" points=\"";
+  for(std::list<Point>::const_iterator p=points.begin(); p!=points.end(); ++p)
+  {
+    if(p!=points.begin())
+       os<<" ";
+    os<< p->x <<","<< p->y;
+  }
+  os<<"\"/>\n";
+  return os.str();
 }
 
 
@@ -319,30 +284,6 @@ void
 Document::footer(std::ostream& os) const
 {
   os<<"</g></svg>"<<std::endl;
-}
-
-
-std::ostream&
-Document::output(std::ostream& os) const
-{
-  this->header(os);
-  for(std::list<Element*>::const_iterator e =this->elements.begin();
-                                          e!=this->elements.end();
-                                        ++e)
-  {
-    (**e).output(os);
-  }
-  this->footer(os);
-  return os;
-}
-
-
-std::string
-Document::str(void) const
-{
-  std::ostringstream ss;
-  this->output(ss);
-  return ss.str();
 }
 
 
