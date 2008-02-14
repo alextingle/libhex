@@ -91,7 +91,6 @@ namespace std {
       return (hash(self.hex()) << 3) | self.direction()
   %}
 };
-%rename(_Document) Document;
 
 // Lots of classes have str() member functions. This renames them so they work
 // with the Python str operator.
@@ -102,24 +101,3 @@ namespace std {
 /* Parse the header file to generate wrappers */
 %include "hex.h"
 %include "hexsvg.h"
-
-%pythoncode %{
-class Document:
-  '''Pure-Python implementation of the Document class.'''
-  def __init__(self,grid):
-      self.grid=grid
-      self.document=_Document(grid)
-      self.stylesheets=self.document.stylesheets
-      self.defs=self.document.defs
-      self.elements=[]
-  def header(self):
-      return self.document.header()
-  def footer(self):
-      return self.document.footer()
-  def __str__(self):
-      result = self.document.header()
-      for e in self.elements:
-        result += str(e)
-      result += self.document.footer()
-      return result
-%}
