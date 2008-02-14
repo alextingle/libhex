@@ -46,37 +46,12 @@ Style style_dict(const std::string& s) throw(hex::invalid_argument);
 
 
 
-/** Draws the boundary around an area, without worrying about voids within. */
-std::string draw_simple_area(const Area& a, float bias =0.0);
-
-/** Draws the boundary around an area, taking account of voids within. */
-std::string draw_complex_area(const Area& a, float bias =0.0);
-
-std::string draw_skeleton(const Area& a, bool include_boundary =true);
-
-/** Draws a boundary line. */
-std::string draw_boundary(const Boundary& b, float bias =0.0);
-
-/** Draws a path line. */
-std::string draw_path(const Path& p);
-
-
 inline std::ostream&
 operator<<(std::ostream& os, hex::Point p)
 {
   os<<p.x<<","<<p.y;
   return os;
 }
-
-
-/** Series of points, rendered as an SVG polygon, or polyline, depending upon
- *  whether they are closed or not. */
-std::string
-draw_poly(
-  std::list<Point> points,
-  bool closed,
-  const Identity* identity =NULL
-);
 
 
 //
@@ -86,11 +61,41 @@ class Document
 {
   const Grid&  _grid;
 public:
+  Point                   p0; ///< Lower left corner of the document.
+  Point                   p1; ///< Upper right corner of the document.
   std::list<std::string>  stylesheets; ///< List of stylesheets to import.
   std::list<std::string>  defs; ///< Fragments insert into the <defs> element.
-  Document(const Grid& grid): _grid(grid) {}
-  void           header(std::ostream& os) const;
-  void           footer(std::ostream& os) const;
+
+  Document(const Grid& grid);
+
+  /** Transform Point p into the document's co-ordinate system. */
+  Point T(const Point& p) const;
+
+  std::string  header(void) const;
+  std::string  footer(void) const;
+
+  /** Draws the boundary around an area, without worrying about voids within. */
+  std::string draw_simple_area(const Area& a, float bias =0.0);
+  
+  /** Draws the boundary around an area, taking account of voids within. */
+  std::string draw_complex_area(const Area& a, float bias =0.0);
+  
+  std::string draw_skeleton(const Area& a, bool include_boundary =true);
+  
+  /** Draws a boundary line. */
+  std::string draw_boundary(const Boundary& b, float bias =0.0);
+  
+  /** Draws a path line. */
+  std::string draw_path(const Path& p);
+  
+  /** Series of points, rendered as an SVG polygon, or polyline, depending upon
+   *  whether they are closed or not. */
+  std::string
+  draw_poly(
+    std::list<Point> points,
+    bool closed,
+    const Identity* identity =NULL
+  );
 };
 
 

@@ -83,7 +83,8 @@ style_dict(const std::string& s) throw(hex::invalid_argument)
  *  @param cmd1  desired command letter
  *  @param p1    desired point
  */
-std::string path_append(char& cmd, Point& p, char cmd1, const Point& p1)
+std::string
+path_append(char& cmd, Point& p, char cmd1, const Point& p1)
 {
   std::ostringstream ss;
   if(p != p1)
@@ -103,13 +104,18 @@ std::string path_append(char& cmd, Point& p, char cmd1, const Point& p1)
 /** Helper function. */
 template<class InputIterator>
 std::ostream&
-output_path_data(std::ostream& os, InputIterator first, InputIterator last)
+output_path_data(
+    const Document&  doc,
+    std::ostream&    os,
+    InputIterator    first,
+    InputIterator    last
+  )
 {
   assert(first!=last);
   --last;
-  os<<"M "<<(*first)<<" L";
+  os<<"M "<<doc.T(*first)<<" L";
   for(InputIterator p =++first; p!=last; ++p)
-      os<<" "<<(*p);
+      os<<" "<<doc.T(*p);
   os<<" Z";
   return os;
 }
@@ -131,117 +137,21 @@ Identity::attributes(void) const
   return result;
 }
 
-//
-// Draw functions
-
-std::string draw_simple_area(const Area& a, float bias)
-{
-  return draw_poly(a.boundary().stroke(bias),true,&a);
-}
-
-std::string draw_complex_area(const Area& a, float bias)
-{
-  using namespace std;
-  std::ostringstream os;
-  os<<"<path fill-rule=\"nonzero\""<<a.attributes()<<" d=\"";
-  const std::list<Point> apoints =a.boundary().stroke(bias);
-  output_path_data(os,apoints.begin(),apoints.end());
-  std::list<Area> voids =a.enclosed_areas();
-  for(list<Area>::const_iterator v=voids.begin(); v!=voids.end(); ++v)
-  {
-    os<<" ";
-    const std::list<Point> vpoints =v->boundary().stroke(-bias);
-    output_path_data(os,vpoints.rbegin(),vpoints.rend());
-  }
-  os<<"\"/>\n";
-  return os.str();
-}
-
-std::string draw_skeleton(const Area& a, bool include_boundary)
-{
-  std::ostringstream os;
-  os<<"<path"<<a.attributes()<<" d=\"";
-  const std::list<Boundary> bb =a.skeleton(include_boundary);
-  Point curr =bb.front().edges().front()->start_point();
-  os<<"M "<<curr;
-  char cmd ='\0';
-  for(std::list<Boundary>::const_iterator b=bb.begin(); b!=bb.end(); ++b)
-  {
-    const std::list<Edge*> edges =b->edges();
-    assert(!edges.empty());
-    os<<path_append(cmd,curr,'m',edges.front()->start_point());
-    for(std::list<Edge*>::const_iterator e=edges.begin(); e!=edges.end(); ++e)
-    {
-      os<<path_append(cmd,curr,'l',(**e).end_point());
-    }
-  }
-  os<<"\"/>\n";
-  return os.str();
-}
-
-
-std::string draw_boundary(const Boundary& b, float bias)
-{
-  return draw_poly(b.stroke(bias), b.is_closed(), &b);
-}
-
-
-std::string draw_path(const Path& p)
-{
-  std::ostringstream os;
-  const std::list<Hex*>& hexes =p.hexes();
-  assert(!hexes.empty());
-  if(hexes.size()>1) // Nothing to draw if there is only one hex in the path.
-  {
-    std::list<Point> points;
-    for(std::list<Hex*>::const_iterator h =hexes.begin(); h!=hexes.end(); ++h)
-        points.push_back( (**h).centre() );
-    bool is_closed =( hexes.front()==hexes.back() );
-    os<<draw_poly(points,is_closed,&p);
-  }
-  return os.str();
-}
-
-
-
-//
-// Poly
-
-std::string
-draw_poly(std::list<Point> points, bool closed, const Identity* identity)
-{
-  assert(!points.empty());
-  std::ostringstream os;
-  if(closed)
-      points.pop_back();
-  if(closed)
-      os<<"<polygon";
-  else
-      os<<"<polyline";
-  if(identity)
-      os<<identity->attributes();
-  os<<" points=\"";
-  for(std::list<Point>::const_iterator p=points.begin(); p!=points.end(); ++p)
-  {
-    if(p!=points.begin())
-       os<<" ";
-    os<< p->x <<","<< p->y;
-  }
-  os<<"\"/>\n";
-  return os.str();
-}
-
 
 //
 // Document
 
-void
-Document::header(std::ostream& os) const
+Point
+Document::T(const Point& p) const
 {
-  Distance width  =this->_grid.width();
-  Distance height =this->_grid.height();
-  Distance hmargin =0.05;
-  Distance vmargin =0.05;
+  return Point( p.x - p0.x, p1.y - p.y );
+}
+
+
+std::string
+Document::header() const
+{
+  std::ostringstream os;
   os<<
     "<?xml version=\"1.0\" standalone=\"no\"?>\n"
     "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
@@ -252,9 +162,10 @@ Document::header(std::ostream& os) const
   {
     os<<"<?xml-stylesheet href=\""<<(*s)<<"\" type=\"text/css\"?>\n";
   }
+  Point extent =p1-p0;
   os<<
     "<svg width=\"100%\" height=\"100%\" viewBox=\""
-    "0 0 "<<(width+hmargin*2.0)<<" "<<(height+vmargin*2.0)<<
+    << 0L <<" "<< 0L << " " << extent.x <<" "<< extent.y <<
     "\" version=\"1.1\""
       " xmlns=\"http://www.w3.org/2000/svg\""
       " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
@@ -273,18 +184,135 @@ Document::header(std::ostream& os) const
   {
     os<<(*d)<<"\n";
   }
-  os<<
-    "</defs>\n"
-    "<g transform=\"translate("<<hmargin<<" "
-      <<(height+vmargin)<<") scale(1 -1)\">\n";
+  os<<"</defs>\n";
+  return os.str();
 }
 
 
-void
-Document::footer(std::ostream& os) const
+std::string
+Document::footer(void) const
 {
-  os<<"</g></svg>"<<std::endl;
+  return "</svg>\n";
 }
+
+
+//
+// Draw functions
+
+std::string
+Document::draw_simple_area(const Area& a, float bias)
+{
+  return draw_poly(a.boundary().stroke(bias),true,&a);
+}
+
+
+std::string
+Document::draw_complex_area(const Area& a, float bias)
+{
+  using namespace std;
+  std::ostringstream os;
+  os<<"<path fill-rule=\"nonzero\""<<a.attributes()<<" d=\"";
+  const std::list<Point> apoints =a.boundary().stroke(bias);
+  output_path_data(*this,os,apoints.begin(),apoints.end());
+  std::list<Area> voids =a.enclosed_areas();
+  for(list<Area>::const_iterator v=voids.begin(); v!=voids.end(); ++v)
+  {
+    os<<" ";
+    const std::list<Point> vpoints =v->boundary().stroke(-bias);
+    output_path_data(*this,os,vpoints.rbegin(),vpoints.rend());
+  }
+  os<<"\"/>\n";
+  return os.str();
+}
+
+
+std::string
+Document::draw_skeleton(const Area& a, bool include_boundary)
+{
+  std::ostringstream os;
+  os<<"<path"<<a.attributes()<<" d=\"";
+  const std::list<Boundary> bb =a.skeleton(include_boundary);
+  Point curr =T( bb.front().edges().front()->start_point() );
+  os<<"M "<<curr;
+  char cmd ='\0';
+  for(std::list<Boundary>::const_iterator b=bb.begin(); b!=bb.end(); ++b)
+  {
+    const std::list<Edge*> edges =b->edges();
+    assert(!edges.empty());
+    os<<path_append(cmd,curr,'m',T( edges.front()->start_point() ));
+    for(std::list<Edge*>::const_iterator e=edges.begin(); e!=edges.end(); ++e)
+    {
+      os<<path_append(cmd,curr,'l',T( (**e).end_point() ));
+    }
+  }
+  os<<"\"/>\n";
+  return os.str();
+}
+
+
+std::string
+Document::draw_boundary(const Boundary& b, float bias)
+{
+  return draw_poly(b.stroke(bias), b.is_closed(), &b);
+}
+
+
+std::string
+Document::draw_path(const Path& p)
+{
+  std::ostringstream os;
+  const std::list<Hex*>& hexes =p.hexes();
+  assert(!hexes.empty());
+  if(hexes.size()>1) // Nothing to draw if there is only one hex in the path.
+  {
+    std::list<Point> points;
+    for(std::list<Hex*>::const_iterator h =hexes.begin(); h!=hexes.end(); ++h)
+        points.push_back( (**h).centre() );
+    bool is_closed =( hexes.front()==hexes.back() );
+    os<<draw_poly(points,is_closed,&p);
+  }
+  return os.str();
+}
+
+
+std::string
+Document::draw_poly(
+    std::list<Point>  points,
+    bool              closed,
+    const Identity*   identity
+  )
+{
+  assert(!points.empty());
+  std::ostringstream os;
+  if(closed)
+      points.pop_back();
+  if(closed)
+      os<<"<polygon";
+  else
+      os<<"<polyline";
+  if(identity)
+      os<<identity->attributes();
+  os<<" points=\"";
+  for(std::list<Point>::const_iterator p=points.begin(); p!=points.end(); ++p)
+  {
+    if(p!=points.begin())
+       os<<" ";
+    os<<T(*p);
+  }
+  os<<"\"/>\n";
+  return os.str();
+}
+
+
+// Construction
+
+Document::Document(const Grid& grid)
+  : _grid(grid),
+    p0(0.0,0.0),
+    p1(grid.width(),grid.height()), 
+    stylesheets(),
+    defs()
+{}
 
 
 } // end namespace svg

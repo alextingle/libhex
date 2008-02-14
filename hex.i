@@ -91,21 +91,6 @@ namespace std {
       return (hash(self.hex()) << 3) | self.direction()
   %}
 };
-%extend hex::svg::Document
-{
-  std::string header_str(void)
-  {
-    std::ostringstream ss;
-    self->header(ss);
-    return ss.str();
-  }
-  std::string footer_str(void)
-  {
-    std::ostringstream ss;
-    self->footer(ss);
-    return ss.str();
-  }
-};
 %rename(_Document) Document;
 
 // Lots of classes have str() member functions. This renames them so they work
@@ -128,13 +113,13 @@ class Document:
       self.defs=self.document.defs
       self.elements=[]
   def header(self):
-      return self.document.header_str()
+      return self.document.header()
   def footer(self):
-      return self.document.footer_str()
+      return self.document.footer()
   def __str__(self):
-      result = self.document.header_str()
+      result = self.document.header()
       for e in self.elements:
         result += str(e)
-      result += self.document.footer_str()
+      result += self.document.footer()
       return result
 %}

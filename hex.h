@@ -178,6 +178,8 @@ struct Point
   Point(): x(0.0), y(0.0) {}
   Point(Distance x_, Distance y_): x(x_), y(y_) {}
   Point(const std::string s) throw (out_of_range,invalid_argument);
+  Point& operator+=(const Point& p) { x+=p.x; y+=p.y; return *this; }
+  Point& operator-=(const Point& p) { x-=p.x; y-=p.y; return *this; }
   Point operator+(const Point& p) const { return Point(x+p.x,y+p.y); }
   Point operator-(const Point& p) const { return Point(x-p.x,y-p.y); }
   Point operator*(double v) const { return Point(x*v,y*v); }
