@@ -70,14 +70,19 @@ Point::str(void) const
 Hex*
 Grid::hex(int i, int j) const throw(hex::out_of_range)
 {
-  try
+  int key =Hex::_key(i,j);
+  std::map<int,Hex*>::const_iterator pos =_hexes.find(key);
+  if(pos==_hexes.end())
   {
-    return _rows.at(j)->at(i);
+    if(0>i || i>=_cols)
+        throw hex::out_of_range("i");
+    if(0>j || j>=_rows)
+        throw hex::out_of_range("j");
+    Hex* newhex = new Hex(*this,i,j);
+    _hexes.insert( std::make_pair(key,newhex) );
+    return newhex;
   }
-  catch(std::out_of_range& e)
-  {
-    throw hex::out_of_range(e.what());
-  }
+  return pos->second;
 }
 
 
@@ -135,9 +140,9 @@ Grid::to_area(void) const
 {
   using namespace std;
   set<Hex*> hexes;
-  for(vector<Row*>::const_iterator j =_rows.begin(); j!=_rows.end(); ++j)
-      for(Row::const_iterator i =(**j).begin(); i!=(**j).end(); ++i)
-          hexes.insert( *i );
+  for(int i=0; i<_cols; ++i)
+      for(int j=0; j<_rows; ++j)
+          hexes.insert( hex(i,j) );
   return Area(hexes);  
 }
 
@@ -256,38 +261,32 @@ Grid::boundary(const std::string& s) const throw(out_of_range,invalid_argument)
 }
 
 
-Grid::Grid(int cols, int rows): _rows()
+Grid::Grid(int cols, int rows) throw(hex::out_of_range)
+  : _hexes(), _cols(cols), _rows(rows)
 {
-  for(int j=0; j<rows; ++j)
-  {
-    _rows.push_back( new Row );
-    for(int i=0; i<cols; ++i)
-        _rows.back()->push_back( new Hex(*this,i,j) );
-  }
+  // Perhaps it's perverse to use ints, and then restrict them to be only
+  // short. I think it just makes the interface less quirky, the code a
+  // bit more efficient, and using shorts wouldn't really save much memory.
+  if(0>cols || cols>=0x4000)
+      throw hex::out_of_range("cols");
+  if(0>rows || rows>=0x4000)
+      throw hex::out_of_range("rows");
 }
 
 
-Grid::Grid(const Grid& v): _rows()
+Grid::Grid(const Grid& v): _hexes(), _cols(v._cols), _rows(v._rows)
 {
   using namespace std;
-  for(vector<Row*>::const_iterator j =v._rows.begin(); j!=v._rows.end(); ++j)
-  {
-    _rows.push_back( new Row );
-    for(Row::const_iterator i =(**j).begin(); i!=(**j).end(); ++i)
-        _rows.back()->push_back( new Hex(*this,**i) );
-  }
+  for(map<int,Hex*>::const_iterator h =v._hexes.begin(); h!=v._hexes.end(); ++h)
+      _hexes.insert( make_pair(h->first,new Hex(*this,*h->second)) );
 }
 
 
 Grid::~Grid()
 {
   using namespace std;
-  for(vector<Row*>::const_iterator j =_rows.begin(); j!=_rows.end(); ++j)
-  {
-    for(Row::const_iterator i =(**j).begin(); i!=(**j).end(); ++i)
-        delete (*i);
-    delete (*j);
-  }
+  for(map<int,Hex*>::const_iterator h =_hexes.begin(); h!=_hexes.end(); ++h)
+      delete h->second;
 }
 
 

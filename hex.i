@@ -60,7 +60,6 @@ namespace std {
   %template(PathList)     std::list<hex::Path>;
   %template(PointList)    std::list<hex::Point>;
   %template(BoundaryList) std::list<hex::Boundary>;
-  %template(ElementList)  std::list<hex::svg::Element*>;
 }
 
 %ignore FIRETREE__HEX_H;
@@ -79,7 +78,7 @@ namespace std {
     def __cmp__(self,other):
       return cmp( self.__hash__(), other.__hash__() )
     def __hash__(self):
-      return (self.i * 10000) ^ (self.j)
+      return (self.i << 14) | (self.j)
   %}
 };
 %extend hex::Edge
@@ -89,25 +88,9 @@ namespace std {
     def __cmp__(self,other):
       return cmp( self.__hash__(), other.__hash__() )
     def __hash__(self):
-      return 10*hash(self.hex()) + self.direction()
+      return (hash(self.hex()) << 3) | self.direction()
   %}
 };
-%extend hex::svg::Document
-{
-  std::string header_str(void)
-  {
-    std::ostringstream ss;
-    self->header(ss);
-    return ss.str();
-  }
-  std::string footer_str(void)
-  {
-    std::ostringstream ss;
-    self->footer(ss);
-    return ss.str();
-  }
-};
-%rename(_Document) Document;
 
 // Lots of classes have str() member functions. This renames them so they work
 // with the Python str operator.
@@ -118,39 +101,3 @@ namespace std {
 /* Parse the header file to generate wrappers */
 %include "hex.h"
 %include "hexsvg.h"
-
-namespace hex {
-  // Singles
-  %template(BoundaryLineSingle) svg::Single<svg::BoundaryLine>;
-  %template(ComplexAreaSingle)  svg::Single<svg::ComplexArea>;
-  %template(PathLineSingle)     svg::Single<svg::PathLine>;
-  %template(SimpleAreaSingle)   svg::Single<svg::SimpleArea>;
-  %template(SkeletonSingle)     svg::Single<svg::Skeleton>;
-  // Groups
-  %template(BoundaryLineGroup)  svg::Group<svg::BoundaryLine>;
-  %template(ComplexAreaGroup)   svg::Group<svg::ComplexArea>;
-  %template(PathLineGroup)      svg::Group<svg::PathLine>;
-  %template(SimpleAreaGroup)    svg::Group<svg::SimpleArea>;
-  %template(SkeletonGroup)      svg::Group<svg::Skeleton>;
-}
-
-%pythoncode %{
-class Document:
-  '''Pure-Python implementation of the Document class.'''
-  def __init__(self,grid):
-      self.grid=grid
-      self.document=_Document(grid)
-      self.stylesheets=self.document.stylesheets
-      self.defs=self.document.defs
-      self.elements=[]
-  def header(self):
-      return self.document.header_str()
-  def footer(self):
-      return self.document.footer_str()
-  def __str__(self):
-      result = self.document.header_str()
-      for e in self.elements:
-        result += str(e)
-      result += self.document.footer_str()
-      return result
-%}

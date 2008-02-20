@@ -61,7 +61,6 @@
 #include <list>
 #include <set>
 #include <map>
-#include <vector>
 #include <stdexcept>
 #include <ostream>
 #include <string>
@@ -179,6 +178,8 @@ struct Point
   Point(): x(0.0), y(0.0) {}
   Point(Distance x_, Distance y_): x(x_), y(y_) {}
   Point(const std::string s) throw (out_of_range,invalid_argument);
+  Point& operator+=(const Point& p) { x+=p.x; y+=p.y; return *this; }
+  Point& operator-=(const Point& p) { x-=p.x; y-=p.y; return *this; }
   Point operator+(const Point& p) const { return Point(x+p.x,y+p.y); }
   Point operator-(const Point& p) const { return Point(x-p.x,y-p.y); }
   Point operator*(double v) const { return Point(x*v,y*v); }
@@ -192,11 +193,12 @@ struct Point
  *  objects exist. */
 class Grid
 {
-  typedef std::vector<Hex*> Row;
-  std::vector<Row*> _rows;
+  mutable std::map<int,Hex*> _hexes;
+  int _cols;
+  int _rows;
 public:
-  int  cols(void) const { return _rows.front()->size(); }
-  int  rows(void) const { return _rows.size(); }
+  int  cols(void) const { return _cols; }
+  int  rows(void) const { return _rows; }
   Distance width(void) const { return I/2.0 + I*cols(); }
   Distance height(void) const { return K*2 + J*(rows()-1); }
   bool is_in_range(int i, int j) const {return 0<=i&&i<cols()&&0<=j&&j<rows();}
@@ -205,7 +207,7 @@ public:
   Hex* hex(const Point& p) const throw(hex::out_of_range);
   Area to_area(void) const;
 public: // construction
-  Grid(int cols, int rows);
+  Grid(int cols, int rows) throw(hex::out_of_range);
 public: // housekeeping
   Grid(const Grid& right);
   virtual ~Grid();
@@ -269,6 +271,8 @@ public:
   Hex*         go(const std::string& steps) const;
   Point        centre(void) const;
   std::string  str(void) const;
+  /** Generates a unique key for co-ordinates i,j. (i,j < 2^14) */
+  static int   _key(int i, int j) { return (i<<14) | j; }
 public: // construction
   Hex(const Grid& grid, int i_, int j_);
 private:

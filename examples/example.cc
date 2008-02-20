@@ -63,6 +63,7 @@ int main()
 
   // Make an SVG document to represent the grid.
   hex::svg::Document doc(grid);
+  cout << doc.header();
 
 
   // DRAWING HEXES
@@ -73,37 +74,28 @@ int main()
 
   // DRAWING AREAS
   
-  // Areas are the most commonly drawn objects. Just set the SVG drawing-style,
+  // Areas are the most commonly drawn objects. Just set the SVG drawing-style.
   area_5.style="fill:lightblue; stroke:darkblue; stroke-width:0.04";
-  // ...put the area into an adapter,
-  hex::svg::Single<hex::svg::SimpleArea> area_5_element( area_5, +0.1 );
-  // ...and add it to the document.
-  doc.elements.push_back( &area_5_element );
+  cout << doc.draw_simple_area( area_5, +0.1 );
 
-  // Similar areas may be grouped together. Start with a list of Areas.
-  std::list<hex::Area> area_list;
-  area_list.push_back( area_1 );
-  area_list.push_back( hex::Area(hex_2) );
-  area_list.push_back( hex::Area(hex_3) );
+  // Now put a list of similar Areas into a Group.
+  cout << "<g style=\"fill:pink; stroke:darkred; stroke-width:0.04\">\n";
+  cout << doc.draw_simple_area( area_1, -0.1 );
+  cout << doc.draw_simple_area( hex::Area(hex_2), -0.1 );
+  cout << doc.draw_simple_area( hex::Area(hex_3), -0.1 );
   // You can over-ride styles for individual group members.
   area_4.style="fill:lightgreen; stroke:darkgreen";
-  area_list.push_back( area_4 );
-  // Now put the list of Areas into a Group.
-  hex::svg::Group<hex::svg::SimpleArea> area_group( area_list, -0.1 );
-  // The default style for all group members is set here.
-  area_group.style="fill:pink; stroke:darkred; stroke-width:0.04";
-  doc.elements.push_back( &area_group );
+  cout << doc.draw_simple_area( area_4, -0.1 );
+  cout << "</g>\n";
 
   
   // DRAWING PATHS
   
-  // Just use the PathLine adapter to draw a Path.
-  std::list<hex::Path> path_list;
-  path_list.push_back(path_from_1_to_3);
-  path_list.push_back(path_from_2);
-  hex::svg::Group<hex::svg::PathLine> path_group( path_list );
-  path_group.style="fill:none; stroke:black; stroke-width:0.08; marker-end:url(#Triangle)";
-  doc.elements.push_back( &path_group );
+  // Just use the draw_path() function to draw a Path.
+  cout << "<g style=\"fill:none; stroke:black; stroke-width:0.08; marker-end:url(#Triangle)\">\n";
+  cout << doc.draw_path(path_from_1_to_3);
+  cout << doc.draw_path(path_from_2);
+  cout << "</g>\n";
   
 
   // DRAWING THE GRID
@@ -114,13 +106,12 @@ int main()
 
   hex::Area grid_area =grid.to_area();
   grid_area.style="fill:none; stroke:gray; stroke-width:0.01";
-  hex::svg::Single<hex::svg::Skeleton> skeleton(grid_area,true);
-  doc.elements.push_back( &skeleton );
+  cout << doc.draw_skeleton( grid_area );
 
 
-  // Finally, write the SVG to standard output.
+  // Finally, write the SVG footer to standard output.
 
-  doc.output(cout);
+  cout << doc.footer();
 
   return 0;
 }
