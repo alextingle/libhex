@@ -41,6 +41,7 @@ SOURCES := \
  edge.cc \
  grid.cc \
  hex.cc \
+ move.cc \
  path.cc \
  svg.cc \
 
