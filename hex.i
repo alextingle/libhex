@@ -27,6 +27,7 @@
 /* Includes the header in the wrapper code */
 #include "hex.h"
 #include "hexsvg.h"
+#include "hexmove.h"
 #include <sstream>
 %}
 

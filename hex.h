@@ -252,7 +252,7 @@ public:
 private:
   friend class Hex;
   Edge(Hex* h, Direction d): _hex(h), _direction(d) {}
-  virtual ~Edge() {}
+  ~Edge() {}
 };
 
 
@@ -280,7 +280,7 @@ private:
   Hex(const Hex& right);               ///< No implementation.
   Hex& operator=(const Hex&);          ///< No implementation.
   Hex(const Grid& grid, const Hex& h); ///< Only callable by Grid.
-  virtual ~Hex() {}                    ///< Only callable by Grid.
+  ~Hex() {}                            ///< Only callable by Grid.
 };
 
 

@@ -54,10 +54,8 @@ int main()
   os<<d.draw_boundary( pb, -0.3 );
 */
   hex::move::Environment env(1);
-  for(set<hex::Hex*>::const_iterator i=r.hexes().begin(); i!=r.hexes().end(); ++i)
-    env.increase_hex_cost(*i,2);
-  for(set<hex::Hex*>::const_iterator i=a.hexes().begin(); i!=a.hexes().end(); ++i)
-    env.increase_hex_cost(*i,100);
+  env.increase_cost(r,2);
+  env.increase_cost(a,100);
 cerr<<a.str()<<endl;
   hex::Path bp =env.best_path( g.hex(1,3),g.hex(8,5) );
   bp.style="fill:none;stroke:#33f; stroke-width:0.08; marker-end:url(#Triangle)";

@@ -99,15 +99,51 @@ Environment::override_edge_cost(hex::Edge* e, Cost c)
 }
 
 
+void
+Environment::increase_cost(const hex::Area& a, Cost c)
+{
+  const std::set<hex::Hex*>& hexes = a.hexes();
+  for(std::set<hex::Hex*>::const_iterator i=hexes.begin(); i!=hexes.end(); ++i)
+    increase_hex_cost(*i,c);
+}
+
+
+void
+Environment::override_cost(const hex::Area& a, Cost c)
+{
+  const std::set<hex::Hex*>& hexes = a.hexes();
+  for(std::set<hex::Hex*>::const_iterator i=hexes.begin(); i!=hexes.end(); ++i)
+    override_hex_cost(*i,c);
+}
+
+
+void
+Environment::increase_cost(const hex::Boundary& b, Cost c)
+{
+  const std::list<hex::Edge*>& edges = b.edges();
+  for(std::list<hex::Edge*>::const_iterator i=edges.begin(); i!=edges.end(); ++i)
+    increase_edge_cost(*i,c);
+}
+
+
+void
+Environment::override_cost(const hex::Boundary& b, Cost c)
+{
+  const std::list<hex::Edge*>& edges = b.edges();
+  for(std::list<hex::Edge*>::const_iterator i=edges.begin(); i!=edges.end(); ++i)
+    override_edge_cost(*i,c);
+}
+
+
 hex::Path
 Environment::best_path(hex::Hex* start, hex::Hex* goal) const throw(no_solution)
 {
   std::set<hex::Hex*> visited;
-  std::multiset<Route> queue;
-  queue.insert( Route::factory(start,goal) );
+  std::multiset<_Route> queue;
+  queue.insert( _Route::factory(start,goal) );
   while(!queue.empty())
   {
-    Route curr_route = *queue.begin();
+    _Route curr_route = *queue.begin();
     queue.erase( queue.begin() );
     hex::Hex* curr_hex = curr_route.path.back();
     if(visited.count(curr_hex))
@@ -130,11 +166,11 @@ hex::Area
 Environment::horizon(hex::Hex* start, Cost budget) const throw(no_solution)
 {
   std::set<hex::Hex*> visited;
-  std::multiset<Route> queue;
-  queue.insert( Route::factory(start) );
+  std::multiset<_Route> queue;
+  queue.insert( _Route::factory(start) );
   while(!queue.empty())
   {
-    Route curr_route = *queue.begin();
+    _Route curr_route = *queue.begin();
     queue.erase( queue.begin() );
     hex::Hex* curr_hex = curr_route.path.back();
     if(visited.count(curr_hex))
@@ -182,10 +218,10 @@ Environment::step(hex::Hex* from_hex, Direction direction) const
 //
 // ROUTE
 
-Route
-Route::factory(hex::Hex* start, hex::Hex* goal)
+_Route
+_Route::factory(hex::Hex* start, hex::Hex* goal)
 {
-  Route result;
+  _Route result;
   result.path.push_back(start);
   result.cost  = 0; // g()
   result._value = result.distance(goal); // f()
@@ -193,10 +229,10 @@ Route::factory(hex::Hex* start, hex::Hex* goal)
 }
 
 
-Route
-Route::step(hex::Hex* next, Cost cost, hex::Hex* goal) const
+_Route
+_Route::step(hex::Hex* next, Cost cost, hex::Hex* goal) const
 {
-  Route result;
+  _Route result;
   result.path  = path;
   result.path.push_back(next);
   result.cost  = this->cost + cost; // g()
@@ -206,7 +242,7 @@ Route::step(hex::Hex* next, Cost cost, hex::Hex* goal) const
 
    
 hex::Distance
-Route::distance(hex::Hex* goal) const
+_Route::distance(hex::Hex* goal) const
 {
   if(goal)
   {

@@ -60,6 +60,7 @@ class Environment
 public:
   Environment();
   Environment(Cost dflt);
+  virtual ~Environment() {}
 
   /** Increases the cost of hex h by c. */
   void increase_hex_cost(hex::Hex* h, Cost c);
@@ -70,6 +71,12 @@ public:
   void increase_edge_cost(hex::Edge* e, Cost c);
   /** Set the cost of edge e to c. */
   void override_edge_cost(hex::Edge* e, Cost c);
+
+  // Convenience functions.
+  void increase_cost(const hex::Area& a, Cost c);
+  void override_cost(const hex::Area& a, Cost c);
+  void increase_cost(const hex::Boundary& b, Cost c);
+  void override_cost(const hex::Boundary& b, Cost c);
 
   /** Finds the least-cost hex::Path from start to goal.
    *  Uses the A* algorithm. */
@@ -92,8 +99,11 @@ protected:
 };
 
 
-/** A partial solution to the A* algorithm. */
-class Route
+/** A partial solution to the A* algorithm.
+ *  Only used in the internal workings of the routing algorithms. You won't
+ *  need this class unless you are writing your own routing algorithms.
+ */
+class _Route
 {
   Cost             _value; ///< cost + distance to goal          (f() in A*)
 
@@ -102,17 +112,17 @@ public:
   Cost             cost;  ///< sum of weights of hexes in path. (g() in A*)
 
   /** Generate an entirely new route, just one hex long. */
-  static Route factory(hex::Hex* start, hex::Hex* goal=NULL);
+  static _Route factory(hex::Hex* start, hex::Hex* goal=NULL);
 
-  /** Return a new Route based upon this one. */
-  Route step(hex::Hex* next, Cost cost, hex::Hex* goal=NULL) const;
+  /** Return a new _Route based upon this one. */
+  _Route step(hex::Hex* next, Cost cost, hex::Hex* goal=NULL) const;
      
   /** Distance between the end of this route and the goal, if any.
    *  Used for the h() heuristic function in A* algorithm. */
   hex::Distance distance(hex::Hex* goal) const;
 
   /** Routes sort by value. */
-  bool operator<(const Route& right) const { return _value < right._value; }
+  bool operator<(const _Route& right) const { return _value < right._value; }
 };
 
 
