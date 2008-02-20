@@ -46,7 +46,7 @@ typedef double Cost;
 
 
 /** Models movement costs in a hex grid. */
-class Environment
+class Topography
 {
   bool  _has_default;
   /** Default cost to enter a hex. If NULL, unlisted hexes are off-limits */
@@ -58,9 +58,12 @@ class Environment
    *  DESTINATION hex's edge. */
   std::map<hex::Edge*,Cost>  _edges;
 public:
-  Environment();
-  Environment(Cost dflt);
-  virtual ~Environment() {}
+  Topography();
+  Topography(Cost default_hex_cost);
+  virtual ~Topography() {}
+  
+  /** Calculate set of accessible hexes. */
+  std::set<hex::Hex*> accessible(void) const;
 
   /** Increases the cost of hex h by c. */
   void increase_hex_cost(hex::Hex* h, Cost c);

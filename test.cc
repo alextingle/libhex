@@ -53,14 +53,14 @@ int main()
   cerr<<pb.str()<<" "<<pb.is_closed()<<endl;
   os<<d.draw_boundary( pb, -0.3 );
 */
-  hex::move::Environment env(1);
-  env.increase_cost(r,2);
-  env.increase_cost(a,100);
+  hex::move::Topography move(1);
+  move.increase_cost(r,2);
+  move.increase_cost(a,100);
 cerr<<a.str()<<endl;
-  hex::Path bp =env.best_path( g.hex(1,3),g.hex(8,5) );
+  hex::Path bp =move.best_path( g.hex(1,3),g.hex(8,5) );
   bp.style="fill:none;stroke:#33f; stroke-width:0.08; marker-end:url(#Triangle)";
   os<<d.draw_path(bp);
-  hex::Area hz =env.horizon( g.hex(1,3), 3 );
+  hex::Area hz =move.horizon( g.hex(1,3), 3 );
   hz.style="fill:none;stroke:#33f; stroke-width:0.04; marker-end:url(#Triangle)";
   os<<d.draw_simple_area(hz);
 

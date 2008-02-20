@@ -30,18 +30,31 @@ namespace hex {
 namespace move {
 
 
-Environment::Environment()
+Topography::Topography()
   : _has_default(false), _default(0.0), _hexes(), _edges()
   {}
 
 
-Environment::Environment(Cost dflt)
-  : _has_default(true), _default(dflt), _hexes(), _edges()
+Topography::Topography(Cost default_hex_cost)
+  : _has_default(true), _default(default_hex_cost), _hexes(), _edges()
   {}
 
 
+std::set<hex::Hex*>
+Topography::accessible(void) const
+{
+  using namespace std;
+  set<hex::Hex*> result;
+  for(map<hex::Hex*,Cost>::const_iterator i=_hexes.begin(); i!=_hexes.end();++i)
+    result.insert(i->first);
+  for(map<hex::Edge*,Cost>::const_iterator i=_edges.begin();i!=_edges.end();++i)
+    result.insert(i->first->hex());
+  return result;
+}
+
+
 void
-Environment::increase_hex_cost(hex::Hex* h, Cost c)
+Topography::increase_hex_cost(hex::Hex* h, Cost c)
 {
   {
     std::map<hex::Hex*,Cost>::iterator pos = _hexes.find(h);
@@ -61,7 +74,7 @@ Environment::increase_hex_cost(hex::Hex* h, Cost c)
 
 
 void
-Environment::override_hex_cost(hex::Hex* h, Cost c)
+Topography::override_hex_cost(hex::Hex* h, Cost c)
 {
   _hexes[h] = c;
   for(int d=0; d<DIRECTIONS; ++d)
@@ -71,7 +84,7 @@ Environment::override_hex_cost(hex::Hex* h, Cost c)
   }
 }
       
-void Environment::increase_edge_cost(hex::Edge* e, Cost c)
+void Topography::increase_edge_cost(hex::Edge* e, Cost c)
 {
   if(!e)
     return;
@@ -92,7 +105,7 @@ void Environment::increase_edge_cost(hex::Edge* e, Cost c)
 
 
 void
-Environment::override_edge_cost(hex::Edge* e, Cost c)
+Topography::override_edge_cost(hex::Edge* e, Cost c)
 {
   if(e)
     _edges[e] = c;
@@ -100,7 +113,7 @@ Environment::override_edge_cost(hex::Edge* e, Cost c)
 
 
 void
-Environment::increase_cost(const hex::Area& a, Cost c)
+Topography::increase_cost(const hex::Area& a, Cost c)
 {
   const std::set<hex::Hex*>& hexes = a.hexes();
   for(std::set<hex::Hex*>::const_iterator i=hexes.begin(); i!=hexes.end(); ++i)
@@ -109,7 +122,7 @@ Environment::increase_cost(const hex::Area& a, Cost c)
 
 
 void
-Environment::override_cost(const hex::Area& a, Cost c)
+Topography::override_cost(const hex::Area& a, Cost c)
 {
   const std::set<hex::Hex*>& hexes = a.hexes();
   for(std::set<hex::Hex*>::const_iterator i=hexes.begin(); i!=hexes.end(); ++i)
@@ -118,7 +131,7 @@ Environment::override_cost(const hex::Area& a, Cost c)
 
 
 void
-Environment::increase_cost(const hex::Boundary& b, Cost c)
+Topography::increase_cost(const hex::Boundary& b, Cost c)
 {
   const std::list<hex::Edge*>& edges = b.edges();
   for(std::list<hex::Edge*>::const_iterator i=edges.begin(); i!=edges.end(); ++i)
@@ -127,7 +140,7 @@ Environment::increase_cost(const hex::Boundary& b, Cost c)
 
 
 void
-Environment::override_cost(const hex::Boundary& b, Cost c)
+Topography::override_cost(const hex::Boundary& b, Cost c)
 {
   const std::list<hex::Edge*>& edges = b.edges();
   for(std::list<hex::Edge*>::const_iterator i=edges.begin(); i!=edges.end(); ++i)
@@ -136,7 +149,7 @@ Environment::override_cost(const hex::Boundary& b, Cost c)
 
 
 hex::Path
-Environment::best_path(hex::Hex* start, hex::Hex* goal) const throw(no_solution)
+Topography::best_path(hex::Hex* start, hex::Hex* goal) const throw(no_solution)
 {
   std::set<hex::Hex*> visited;
   std::multiset<_Route> queue;
@@ -153,7 +166,7 @@ Environment::best_path(hex::Hex* start, hex::Hex* goal) const throw(no_solution)
     visited.insert(curr_hex);
     for(int dir=0; dir<DIRECTIONS; ++dir)
     {
-      Environment::Step s = step(curr_hex,hex::A+dir);
+      Topography::Step s = step(curr_hex,hex::A+dir);
       if(s.to_hex && 0==visited.count(s.to_hex))
           queue.insert( curr_route.step(s.to_hex,s.cost,goal) );
     }
@@ -163,7 +176,7 @@ Environment::best_path(hex::Hex* start, hex::Hex* goal) const throw(no_solution)
 
 
 hex::Area
-Environment::horizon(hex::Hex* start, Cost budget) const throw(no_solution)
+Topography::horizon(hex::Hex* start, Cost budget) const throw(no_solution)
 {
   std::set<hex::Hex*> visited;
   std::multiset<_Route> queue;
@@ -180,7 +193,7 @@ Environment::horizon(hex::Hex* start, Cost budget) const throw(no_solution)
     visited.insert(curr_hex);
     for(int dir=0; dir<DIRECTIONS; ++dir)
     {
-      Environment::Step s = step(curr_hex,hex::A+dir);
+      Topography::Step s = step(curr_hex,hex::A+dir);
       if(s.to_hex && 0==visited.count(s.to_hex))
           queue.insert( curr_route.step(s.to_hex,s.cost) );
     }
@@ -189,8 +202,8 @@ Environment::horizon(hex::Hex* start, Cost budget) const throw(no_solution)
 }
 
 
-Environment::Step
-Environment::step(hex::Hex* from_hex, Direction direction) const
+Topography::Step
+Topography::step(hex::Hex* from_hex, Direction direction) const
 {
   Step result = {NULL,_default};
   // Find destination

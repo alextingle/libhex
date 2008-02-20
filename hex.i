@@ -102,3 +102,4 @@ namespace std {
 /* Parse the header file to generate wrappers */
 %include "hex.h"
 %include "hexsvg.h"
+%include "hexmove.h"
