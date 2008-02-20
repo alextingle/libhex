@@ -98,10 +98,11 @@ pylib: _hex.so
 _hex.so: hex_wrap.o $(patsubst %.cc,%.o,$(SOURCES))
 	$(call MakeSharedLib,$^ $(LIBS),$@)
 
-test: test.o solib
+test: test.o libhex$(SOEXT)
 	g++ $(LDFLAGS) $< $(LIBS) -o $@ -L. -lhex
 
-install: solib
+.PHONY: install
+install: libhex$(SOEXT)
 	install libhex$(SOEXT) /usr/local/lib
 	install hex.h hexsvg.h /usr/local/include
 

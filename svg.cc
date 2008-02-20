@@ -24,6 +24,7 @@
 #include "hexsvg.h"
 
 #include <cassert>
+#include <fstream>
 #include <sstream>
 
 
@@ -281,12 +282,14 @@ Document::header(std::ostream& os) const
     "<?xml version=\"1.0\" standalone=\"no\"?>\n"
     "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
       "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
+#if defined(HEX_EXTERNAL_CSS) && HEX_EXTERNAL_CSS!=0
   for(std::list<std::string>::const_iterator s =this->stylesheets.begin();
                                              s!=this->stylesheets.end();
                                            ++s)
   {
     os<<"<?xml-stylesheet href=\""<<(*s)<<"\" type=\"text/css\"?>\n";
   }
+#endif
   os<<
     "<svg width=\"100%\" height=\"100%\" viewBox=\""
     "0 0 "<<(width+hmargin*2.0)<<" "<<(height+vmargin*2.0)<<
@@ -294,7 +297,37 @@ Document::header(std::ostream& os) const
       " xmlns=\"http://www.w3.org/2000/svg\""
       " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 
-    "<defs>\n"
+    "<defs>\n";
+#if !defined(HEX_EXTERNAL_CSS) || HEX_EXTERNAL_CSS==0
+  if(!this->stylesheets.empty())
+  {
+    os<<"<style type=\"text/css\"><![CDATA[\n";
+    for(std::list<std::string>::const_iterator s =this->stylesheets.begin();
+                                               s!=this->stylesheets.end();
+                                             ++s)
+    {
+      std::ifstream css(s->c_str());
+
+      // Copy the css file to os.
+      if(css)
+      {
+        char buf[1024];
+        std::streamsize total =0;
+        while(css.good())
+        {
+          std::streamsize bytes =css.readsome(buf,sizeof(buf));
+          if(!bytes)
+            break;
+          total+=bytes;
+          os.write(buf,bytes);
+        }
+      }
+    }
+    os<<"]]></style>\n";
+  }
+#endif
+
+  os<<
     "<marker id=\"Triangle\""
     " viewBox=\"0 0 10 10\" refX=\"0\" refY=\"5\" "
     " markerUnits=\"strokeWidth\""
