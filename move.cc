@@ -115,17 +115,29 @@ Topography::override_edge_cost(hex::Edge* e, Cost c)
 void
 Topography::increase_cost(const hex::Area& a, Cost c)
 {
-  const std::set<hex::Hex*>& hexes = a.hexes();
-  for(std::set<hex::Hex*>::const_iterator i=hexes.begin(); i!=hexes.end(); ++i)
-    increase_hex_cost(*i,c);
+  increase_cost( a.hexes(), c );
 }
 
 
 void
 Topography::override_cost(const hex::Area& a, Cost c)
 {
-  const std::set<hex::Hex*>& hexes = a.hexes();
-  for(std::set<hex::Hex*>::const_iterator i=hexes.begin(); i!=hexes.end(); ++i)
+  override_cost( a.hexes(), c );
+}
+
+
+void
+Topography::increase_cost(const std::set<hex::Hex*>& s, Cost c)
+{
+  for(std::set<hex::Hex*>::const_iterator i=s.begin(); i!=s.end(); ++i)
+    increase_hex_cost(*i,c);
+}
+
+
+void
+Topography::override_cost(const std::set<hex::Hex*>& s, Cost c)
+{
+  for(std::set<hex::Hex*>::const_iterator i=s.begin(); i!=s.end(); ++i)
     override_hex_cost(*i,c);
 }
 

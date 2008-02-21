@@ -78,6 +78,8 @@ public:
   // Convenience functions.
   void increase_cost(const hex::Area& a, Cost c);
   void override_cost(const hex::Area& a, Cost c);
+  void increase_cost(const std::set<hex::Hex*>& s, Cost c);
+  void override_cost(const std::set<hex::Hex*>& s, Cost c);
   void increase_cost(const hex::Boundary& b, Cost c);
   void override_cost(const hex::Boundary& b, Cost c);
 

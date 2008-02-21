@@ -75,18 +75,18 @@ public:
   std::string  footer(void) const;
 
   /** Draws the boundary around an area, without worrying about voids within. */
-  std::string draw_simple_area(const Area& a, float bias =0.0);
+  std::string draw_simple_area(const Area& a, float bias =0.0) const;
   
   /** Draws the boundary around an area, taking account of voids within. */
-  std::string draw_complex_area(const Area& a, float bias =0.0);
+  std::string draw_complex_area(const Area& a, float bias =0.0) const;
   
-  std::string draw_skeleton(const Area& a, bool include_boundary =true);
+  std::string draw_skeleton(const Area& a, bool include_boundary =true) const;
   
   /** Draws a boundary line. */
-  std::string draw_boundary(const Boundary& b, float bias =0.0);
+  std::string draw_boundary(const Boundary& b, float bias =0.0) const;
   
   /** Draws a path line. */
-  std::string draw_path(const Path& p);
+  std::string draw_path(const Path& p) const;
   
   /** Series of points, rendered as an SVG polygon, or polyline, depending upon
    *  whether they are closed or not. */
@@ -95,7 +95,7 @@ public:
     std::list<Point> points,
     bool closed,
     const Identity* identity =NULL
-  );
+  ) const;
 };
 
 

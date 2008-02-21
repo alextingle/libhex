@@ -232,14 +232,14 @@ Document::footer(void) const
 // Draw functions
 
 std::string
-Document::draw_simple_area(const Area& a, float bias)
+Document::draw_simple_area(const Area& a, float bias) const
 {
   return draw_poly(a.boundary().stroke(bias),true,&a);
 }
 
 
 std::string
-Document::draw_complex_area(const Area& a, float bias)
+Document::draw_complex_area(const Area& a, float bias) const
 {
   using namespace std;
   std::ostringstream os;
@@ -259,7 +259,7 @@ Document::draw_complex_area(const Area& a, float bias)
 
 
 std::string
-Document::draw_skeleton(const Area& a, bool include_boundary)
+Document::draw_skeleton(const Area& a, bool include_boundary) const
 {
   std::ostringstream os;
   os<<"<path"<<a.attributes()<<" d=\"";
@@ -283,14 +283,14 @@ Document::draw_skeleton(const Area& a, bool include_boundary)
 
 
 std::string
-Document::draw_boundary(const Boundary& b, float bias)
+Document::draw_boundary(const Boundary& b, float bias) const
 {
   return draw_poly(b.stroke(bias), b.is_closed(), &b);
 }
 
 
 std::string
-Document::draw_path(const Path& p)
+Document::draw_path(const Path& p) const
 {
   std::ostringstream os;
   const std::list<Hex*>& hexes =p.hexes();
@@ -312,7 +312,7 @@ Document::draw_poly(
     std::list<Point>  points,
     bool              closed,
     const Identity*   identity
-  )
+  ) const
 {
   assert(!points.empty());
   std::ostringstream os;
