@@ -105,7 +105,7 @@ test: test.o libhex$(SOEXT)
 .PHONY: install
 install: libhex$(SOEXT)
 	install libhex$(SOEXT) /usr/local/lib
-	install hex.h hexsvg.h /usr/local/include
+	install hex.h hexsvg.h hexmove.h /usr/local/include
 
 .PHONY: clean
 clean:
