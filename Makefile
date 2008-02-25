@@ -37,6 +37,7 @@ SOURCES := \
  algorithm.cc \
  area.cc \
  boundary.cc \
+ boundingbox.cc \
  direction.cc \
  edge.cc \
  grid.cc \

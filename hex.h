@@ -357,6 +357,37 @@ public: // construction
 };
 
 
+/** Represents a square region.
+ *  The corners are stored both as coordinates and hexes.
+ *  BEWARE: The hex corners are not really a good measure of which hexes
+ *  are genuinely contained between point0 & point1.
+ */
+struct BoundingBox
+{
+  Point  point0; ///< Lower left corner
+  Point  point1; ///< Upper right corner
+  Hex*   hex0;   ///< Lower left hex
+  Hex*   hex1;   ///< Upper right hex
+  std::set<Hex*>  hexes(void) const; ///< (approximately) contained hexes.
+  /** Expands point0 & point1 by 0.5 hex in every diection. */
+  void frame(void);
+  BoundingBox(
+      const Point& point0_, const Point& point1_,
+      Hex* const   hex0_,   Hex* const   hex1_
+    );
+public: // construction
+  /** Make a box that contains the whole grid. */
+  BoundingBox(const Grid& grid, bool frame=false);
+  /** Make a box that contains the hex set. */
+  BoundingBox(const std::set<Hex*>& a, bool frame=false)
+    throw (hex::invalid_argument);
+  /** Make a box with defined corner points. */
+  BoundingBox(const Grid& grid, const Point& p0,const Point& p1);
+  /** Make a box with defined corner hexes. */
+  BoundingBox(Hex* hex0_, Hex* hex1_, bool frame=false);
+};
+
+
 //
 // Algorithms
 

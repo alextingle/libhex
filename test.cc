@@ -15,8 +15,8 @@ int main()
   hex::svg::Document d(g);
   std::ostringstream os;
   hex::Point margin(0.5,0.5);
-  d.p0 -= margin;
-  d.p1 += margin;
+  d.bbox.point0 -= margin;
+  d.bbox.point1 += margin;
   os<<d.header();
 
   hex::Area a =hex::Path(g.hex(1,1),g.hex(7,4)).to_area();

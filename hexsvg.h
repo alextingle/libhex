@@ -61,8 +61,7 @@ class Document
 {
   const Grid&  _grid;
 public:
-  Point                   p0; ///< Lower left corner of the document.
-  Point                   p1; ///< Upper right corner of the document.
+  BoundingBox             bbox; ///< Sets the region to be drawn.
   std::list<std::string>  stylesheets; ///< List of stylesheets to import.
   std::list<std::string>  defs; ///< Fragments insert into the <defs> element.
 

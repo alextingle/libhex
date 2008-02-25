@@ -145,7 +145,7 @@ Identity::attributes(void) const
 Point
 Document::T(const Point& p) const
 {
-  return Point( p.x - p0.x, p1.y - p.y );
+  return Point( p.x - bbox.point0.x, bbox.point1.y - p.y );
 }
 
 
@@ -165,7 +165,7 @@ Document::header() const
     os<<"<?xml-stylesheet href=\""<<(*s)<<"\" type=\"text/css\"?>\n";
   }
 #endif
-  Point extent =p1-p0;
+  Point extent =bbox.point1 - bbox.point0;
   os<<
     "<svg width=\"100%\" height=\"100%\" viewBox=\""
     << 0L <<" "<< 0L << " " << extent.x <<" "<< extent.y <<
@@ -340,8 +340,7 @@ Document::draw_poly(
 
 Document::Document(const Grid& grid)
   : _grid(grid),
-    p0(0.0,0.0),
-    p1(grid.width(),grid.height()), 
+    bbox(grid,true),
     stylesheets(),
     defs()
 {}
