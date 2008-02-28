@@ -362,7 +362,7 @@ HEX.Edge.prototype = {
         else
             return this.start_point(bias); // clockwise
       }
-      else if(next.valueOf() === next_out().valueOf())
+      else if(next.valueOf() === this.next_out().valueOf())
       {
         var p =this._corner_offset( this.hex.centre(), HEX.add(this.direction,2) );
         return this._corner_offset( p, this.direction, bias );
@@ -399,7 +399,7 @@ HEX.Hex = function(a,b)
   {
     var piece =a.split('_');
     if(piece.length!==2)
-      throw HEX.invalid_argument(a);
+      throw HEX.invalid_argument("'HEX.Hex('"+a+"')");
     this.i=parseInt(piece[0],10);
     this.j=parseInt(piece[1],10);
   }
