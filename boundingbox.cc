@@ -96,8 +96,8 @@ BoundingBox::BoundingBox(const Grid& grid, const Point& p0, const Point& p1)
 {
   int i0 = std::max( 0, int(p0.x)-1 ); // Calculate the boundary hexes.
   int j0 = std::max( 0, int(p0.y / hex::J) );
-  int i1 = int( ceil(p1.x) );
-  int j1 = int( ceil(p1.y / hex::J) );
+  int i1 = std::min( grid.cols()-1, int( ceil(p1.x) ) );
+  int j1 = std::min( grid.rows()-1, int( ceil(p1.y / hex::J) ) );
   *this = BoundingBox(p0, p1, grid.hex(i0,j0), grid.hex(i1,j1));
 }
 
