@@ -786,7 +786,7 @@ HEX.Boundary.prototype = {
       var result =[];
       var last =null;
       for(var e=0, len=this.edges.length; e<len; ++e)
-        if( !last || this.edges[e].hex.valueOf() != last )
+        if( !last || this.edges[e].hex.valueOf() !== last )
         {
           result.push( this.edges[e].hex );
           last=this.edges[e].hex.valueOf();
@@ -1027,8 +1027,29 @@ HEX.range = function(h,distance)
           } catch(e) {}
     }
   }
-  result.sort();
+  HEX.sort(result);
   return result;
+}
+
+
+/** Compare-by-value for sorting.
+ *  null & undefined values are pushed to the end. */
+HEX._cmp = function(a,b)
+{
+  // Push empty elements to the end.
+  if(b===null || b===undefined) return -1; // [a,b]
+  if(a===null || a===undefined) return 1;  // [b,a]
+  // ...otherwise sort by value.
+  return( a.valueOf() - b.valueOf() );
+}
+
+
+/** In-place sort an array by value, rather than by string.
+ *  Moan: Who the hell thought it was a good idea for the default Javascript
+ *  sort to be by string-representation?? */
+HEX.sort = function(hex_array)
+{
+  hex_array.sort(HEX._cmp);
 }
 
 
@@ -1039,7 +1060,7 @@ HEX.range = function(h,distance)
  */
 HEX.uniq = function(hex_array)
 {
-  hex_array.sort();
+  hex_array.sort(HEX._cmp);
   var new_length =hex_array.length;
   var curr =-1;
   for(var i=0, len=hex_array.length; i<len; ++i)
@@ -1056,7 +1077,7 @@ HEX.uniq = function(hex_array)
   }
   if(new_length!==len)
   {
-    hex_array.sort(); // pushes all empty elements to the end.
+    hex_array.sort(HEX._cmp); // pushes all empty elements to the end.
     hex_array.length = new_length;
   }
 }
@@ -1112,7 +1133,7 @@ HEX.set_erase = function(hexset,h)
   if(pos>=0)
   {
     delete hexset[pos];
-    hexset.sort();
+    hexset.sort(HEX._cmp);
     hexset.pop();
     return true;
   }
