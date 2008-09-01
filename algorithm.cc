@@ -23,6 +23,7 @@
 
 #include "hex.h"
 
+#include <algorithm>
 #include <cassert>
 #include <sstream>
 

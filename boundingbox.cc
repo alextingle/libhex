@@ -104,7 +104,16 @@ BoundingBox::BoundingBox(const Grid& grid, const Point& p0, const Point& p1)
 
 BoundingBox::BoundingBox(Hex* hex0_, Hex* hex1_, bool frame_)
 {
-  *this = BoundingBox(hex0_->centre(), hex1_->centre(), hex0_, hex1_);
+  Point p0 =hex0_->centre();
+  Point p1 =hex1_->centre();
+  if(hex1_->j != hex0_->j)
+  {
+    if( hex1_->j % 2 )
+      p1.x += (hex::I/2.0);
+    if( (hex0_->j % 2)==0 )
+      p1.x += (hex::I/2.0);
+  }
+  *this = BoundingBox(p0, p1, hex0_, hex1_);
   if(frame_)
       frame();
 }

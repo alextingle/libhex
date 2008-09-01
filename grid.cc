@@ -27,6 +27,7 @@
 #include <cmath>
 #include <cerrno>
 #include <cassert>
+#include <cstdlib>
 
 namespace hex {
 
