@@ -278,5 +278,5 @@ _Route::distance(hex::Hex* goal) const
 }
 
 
-} // end namespace svg
+} // end namespace move
 } // end namespace hex
