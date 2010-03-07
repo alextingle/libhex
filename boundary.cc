@@ -2,7 +2,7 @@
  * boundary.cc                Created   : 2007/10/11
  *                            Author    : Alex Tingle
  *
- *    Copyright (C) 2007-2008, Alex Tingle.
+ *    Copyright (C) 2007-2010, Alex Tingle.
  *
  *    This file is part of the libhex application.
  *
@@ -23,6 +23,8 @@
 
 #include "hex.h"
 
+#include "internal.h"
+
 #include <cassert>
 
 namespace hex {
@@ -38,7 +40,7 @@ Boundary::length(void) const ///< in units of K
 bool
 Boundary::is_closed(void) const
 {
-  return( _edges.size()>2 && _edges.front()->is_next( *_edges.back() ) );
+  return( size_greater(_edges,2) && _edges.front()->is_next( *_edges.back() ) );
 }
 
 
@@ -48,9 +50,7 @@ Boundary::is_container(void) const
   if(is_closed())
   {
     try {
-      Path p1 =complement().to_path();
-      Path p0 =to_path();
-      return( p0.length() < p1.length() );
+      return( this->complement().path_length() > this->path_length() );
     }
     catch(hex::out_of_range) {
       // If is_closed AND there is no complement, then the boundary must
@@ -89,18 +89,37 @@ Boundary::to_path(void) const
 }
 
 
+int
+Boundary::path_length(void) const
+{
+  // Equivalent to to_path()->length(), but much more efficient.
+  int result =0;
+  Hex* last = NULL;
+  for(std::list<Edge*>::const_iterator e=_edges.begin(); e!=_edges.end(); ++e)
+  {
+    if( !last || (**e).hex() != last )
+    {
+      ++result;
+      last = (**e).hex();
+    }
+  }
+  return result;
+}
+
+
 bool
 Boundary::clockwise(void) const
 {
   // Boundaries usually go round in a positive (anti-clockwise) direction.
-  if(_edges.size() > 1)
-  {
-    std::list<Edge*>::const_iterator e =_edges.begin();
-    Edge* e0 = *e;
-    Edge* e1 = *(++e);
-    return( e0==e1->next_in() || e0==e1->next_out() );
-  }
-  return false;
+  std::list<Edge*>::const_iterator e =_edges.begin();
+  if(e==_edges.end())
+      return false; // list is empty.
+  Edge* e0 = *e;
+  ++e;
+  if(e==_edges.end())
+      return false; // list is single-valued.
+  Edge* e1 = *e;
+  return( e0==e1->next_in() || e0==e1->next_out() );
 }
 
 

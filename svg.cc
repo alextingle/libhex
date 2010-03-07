@@ -2,7 +2,7 @@
  * svg.cc                     Created   : 2007/10/25
  *                            Author    : Alex Tingle
  *
- *    Copyright (C) 2007-2008, Alex Tingle.
+ *    Copyright (C) 2007-2010, Alex Tingle.
  *
  *    This file is part of the libhex application.
  *
@@ -22,6 +22,8 @@
  */
 
 #include "hexsvg.h"
+
+#include "internal.h"
 
 #include <cassert>
 #include <fstream>
@@ -295,7 +297,7 @@ Document::draw_path(const Path& p) const
   std::ostringstream os;
   const std::list<Hex*>& hexes =p.hexes();
   assert(!hexes.empty());
-  if(hexes.size()>1) // Nothing to draw if there is only one hex in the path.
+  if(size_greater(hexes,1)) // Nothing to draw if only one hex in the path.
   {
     std::list<Point> points;
     for(std::list<Hex*>::const_iterator h =hexes.begin(); h!=hexes.end(); ++h)

@@ -2,7 +2,7 @@
  * hex.h                      Created   : 2007/10/11
  *                            Author    : Alex Tingle
  *
- *    Copyright (C) 2007-2008, Alex Tingle.
+ *    Copyright (C) 2007-2010, Alex Tingle.
  *
  *    This file is part of the libhex application.
  *
@@ -352,6 +352,7 @@ public:
   Boundary                 complement(void) const throw(hex::out_of_range);
   const std::list<Edge*>&  edges(void) const { return _edges; }
   Path                     to_path(void) const;
+  int                      path_length(void) const; ///< == to_path().length()
   bool                     clockwise(void) const; ///< normally false.
   std::string              str(void) const;
   /** Calculate the set of points required to draw this boundary. */
