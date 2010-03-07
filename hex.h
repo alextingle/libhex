@@ -170,7 +170,7 @@ class Path;
 class Boundary;
 
 
-/** X-Y coordinate. */
+/** X-Y coordinate. String representation is "x,y", e.g. "1.2,3.4". */
 struct Point
 {
   Distance x,y;
@@ -263,7 +263,8 @@ private:
 };
 
 
-/** A single hexagonal quanta of area. */
+/** A single hexagonal quanta of area.
+ *  String representation is "i_j", e.g. "1_2". */
 class Hex
 {
   Edge  _edgeA,_edgeB,_edgeC,_edgeD,_edgeE,_edgeF;
@@ -364,7 +365,7 @@ public: // construction
 };
 
 
-/** Represents a square region.
+/** Represents a rectangular region.
  *  The corners are stored both as coordinates and hexes.
  *  BEWARE: The hex corners are not really a good measure of which hexes
  *  are genuinely contained between point0 & point1.

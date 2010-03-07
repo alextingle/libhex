@@ -38,8 +38,8 @@ namespace hex {
 
 Point::Point(const std::string s) throw (out_of_range,invalid_argument)
 {
-  // Parse strings like: / *[-+]?\d+_ *[-+]?\d+([^\d].*)?/
-  // E.g.  '1_2' ' +2_ 4' '2_4 # comment'
+  // Parse strings like: / *[-+]?\d+, *[-+]?\d+([^\d].*)?/
+  // E.g.  '1,2' ' +2, 4' '2,4 # comment'
   const char* buf =s.c_str();
   char* endptr =NULL;
   errno=0;

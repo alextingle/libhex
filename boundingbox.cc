@@ -73,7 +73,7 @@ BoundingBox::BoundingBox(const std::set<Hex*>& a, bool frame_)
   throw (hex::invalid_argument)
 {
   if(a.empty())
-      throw hex::invalid_argument("BoundingBox::make(<empty set>)");
+      throw hex::invalid_argument("BoundingBox(<empty set>)");
   int i0 = INT_MAX;
   int j0 = INT_MAX;
   int i1 = INT_MIN;
