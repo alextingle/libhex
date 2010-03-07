@@ -24,6 +24,7 @@
 #include "hex.h"
 
 #include <cmath>
+#include <limits>
 
 namespace hex {
 
@@ -74,10 +75,10 @@ BoundingBox::BoundingBox(const std::set<Hex*>& a, bool frame_)
 {
   if(a.empty())
       throw hex::invalid_argument("BoundingBox(<empty set>)");
-  int i0 = INT_MAX;
-  int j0 = INT_MAX;
-  int i1 = INT_MIN;
-  int j1 = INT_MIN;
+  int i0 = std::numeric_limits<int>::max();
+  int j0 = std::numeric_limits<int>::max();
+  int i1 = std::numeric_limits<int>::min();
+  int j1 = std::numeric_limits<int>::min();
   for(std::set<Hex*>::const_iterator h=a.begin(); h!=a.end(); ++h)
   {
     i0 = std::min(i0,(**h).i);
