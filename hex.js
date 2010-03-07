@@ -128,7 +128,7 @@ HEX.rotate = function(steps,i)
 //
 //  HEX.Point
 
-/** X-Y coordinate class. */
+/** X-Y coordinate class. String representation is "x,y", e.g. "1.2,3.4". */
 HEX.Point = function(a,b)
 {
   if(typeof a === 'string')
@@ -174,6 +174,17 @@ HEX.Grid = function(cols,rows)
 }
 
 HEX.Grid.prototype = {
+
+  to_area : function()
+    {
+      var hexes = [];
+      for(var i=0; i<this.cols; ++i)
+          for(var j=0; j<this.rows; ++j)
+              hexes.push( this.hex(i,j) );
+      HEX.uniq(hexes);
+      return new HEX.Area(hexes);
+    },
+
   // factory methods
 
   hex : function(a,b)
@@ -198,7 +209,7 @@ HEX.Grid.prototype = {
   area : function(str)
     {
       // Parse string of area fillpaths
-      // E.g. 1,2>CDE:ABC
+      // E.g. 1_2>CDE:ABC
       var result = [];
       var pos =str.search(/[>:]/);
       if(pos<0)
@@ -503,7 +514,14 @@ HEX.Hex.prototype = {
     {
       var pos ={ i:this.i, j:this.j };
       HEX.go(pos,steps,distance);
-      return this.grid.hex( pos.i, pos.j );
+      try
+      {
+        return this.grid.hex( pos.i, pos.j );
+      }
+      catch(e if e instanceof HEX.exception && e.kind=='out_of_range')
+      {
+        return null;
+      }
     },
 
   toString : function()
