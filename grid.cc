@@ -36,7 +36,7 @@ namespace hex {
 // Point
 
 
-Point::Point(const std::string s) throw (out_of_range,invalid_argument)
+Point::Point(const std::string& s) throw (out_of_range,invalid_argument)
 {
   // Parse strings like: / *[-+]?\d+, *[-+]?\d+([^\d].*)?/
   // E.g.  '1,2' ' +2, 4' '2,4 # comment'
