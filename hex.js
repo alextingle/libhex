@@ -55,9 +55,9 @@ HEX.out_of_range = function(message)
 // Distance
 
 HEX.M_SQRT3 =1.73205080756887729352744634150587236; // sqrt(3)
-HEX.I =1.0;
-HEX.J =HEX.M_SQRT3/2.0;
-HEX.K =1.0/HEX.M_SQRT3;
+HEX.I =1.0;             ///< Distance between centres of adjacent hexes.
+HEX.J =HEX.M_SQRT3/2.0; ///< Distance between adjacent hex rows.
+HEX.K =1.0/HEX.M_SQRT3; ///< Length of hex's edge.
 
 //
 // Direction
@@ -147,11 +147,14 @@ HEX.Point = function(a,b)
 }
 
 HEX.Point.prototype = {
+  /** Return a new Point, translated by vector (dx,dy). */
   offset : function(dx,dy) { return new HEX.Point(this.x+dx, this.y+dy); },
+  /** Return a new Point, translated by vector (p.x,p.y). */
   add : function(p) { return new HEX.Point(this.x+p.x, this.y+p.y); },
   sub : function(p) { return new HEX.Point(this.x-p.x, this.y-p.y); },
   mul : function(v) { return new HEX.Point(this.x*v, this.y*v); },
   div : function(v) { return new HEX.Point(this.x/v, this.y/v); },
+  /** The string representation of a Point is "x,y" */
   toString : function() { return ''+this.x+','+this.y; }
 };
 
@@ -372,7 +375,9 @@ HEX.Edge.prototype = {
       return this.start_point( bias, (clockwise? false: true) );
     },
 
-  /** @param next  adjacent Edge object.
+  /** Calculate the point where two biased edged meet. This might be complicated
+   *  if the two edged belong to different hexes.
+   *  @param next  adjacent Edge object.
    *  @param bias  float [DEFAULT=1.0]
    *  @return  new Point
    */
@@ -598,9 +603,9 @@ HEX.Area.prototype = {
       for(var h=0, len=this.hexes.length; h<len; ++h)
       {
         var edges =[];
-        edges.push( this.hexes[h].edge(A) );
-        edges.push( this.hexes[h].edge(B) );
-        edges.push( this.hexes[h].edge(C) );
+        edges.push( this.hexes[h].edge(HEX.A) );
+        edges.push( this.hexes[h].edge(HEX.B) );
+        edges.push( this.hexes[h].edge(HEX.C) );
         result.push( new HEX.Boundary(edges) );
       }
       if(include_boundary)
@@ -820,8 +825,10 @@ HEX.Boundary.prototype = {
       {
         var e0 =this.edges[0];
         var e1 =this.edges[1];
-        return( e0.valueOf()===e1.next_in().valueOf() ||
-                e0.valueOf()===e1.next_out().valueOf() );
+        if(e0.valueOf()===e1.next_in().valueOf())
+            return true;
+        var e1_next_out =e1.next_out(); // May be null.
+        return( e1_next_out && e0.valueOf()===e1_next_out.valueOf() );
       }
       return false;
     },
