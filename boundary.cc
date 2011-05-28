@@ -30,10 +30,10 @@
 namespace hex {
 
 
-int
+size_t
 Boundary::length(void) const ///< in units of K
 {
-  return int( _edges.size() );
+  return _edges.size();
 }
 
 
@@ -89,11 +89,11 @@ Boundary::to_path(void) const
 }
 
 
-int
+size_t
 Boundary::path_length(void) const
 {
   // Equivalent to to_path()->length(), but much more efficient.
-  int result =0;
+  size_t result =0;
   Hex* last = NULL;
   for(std::list<Edge*>::const_iterator e=_edges.begin(); e!=_edges.end(); ++e)
   {

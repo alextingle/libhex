@@ -37,10 +37,10 @@ Path::to_area(void) const
 }
 
 
-int
+size_t
 Path::length(void) const
 {
-  return int( _hexes.size() );
+  return _hexes.size();
 }
 
 

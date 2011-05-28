@@ -31,7 +31,7 @@ namespace hex {
 
 
 void
-go(int& i, int& j, Direction d, int distance)
+go(int& i, int& j, Direction d, size_t distance)
 {
   for(; distance>0; --distance)
       if(j%2)
@@ -104,7 +104,7 @@ steps(const Hex* from, const Hex* to)
 }
 
 
-int
+size_t
 distance(const Hex* from, const Hex* to)
 {
   return steps(from,to).size();
@@ -112,7 +112,7 @@ distance(const Hex* from, const Hex* to)
 
 
 std::set<Hex*>
-range(Hex* h, int distance)
+range(Hex* h, size_t distance)
 {
   std::set<Hex*> result;
   if(distance<1)

@@ -288,7 +288,7 @@ private:
   Hex(const Hex& right);               ///< No implementation.
   Hex& operator=(const Hex&);          ///< No implementation.
   Hex(const Grid& grid, const Hex& h); ///< Only callable by Grid.
-  ~Hex() {}                            ///< Only callable by Grid.
+  ~Hex(void) {}                        ///< Only callable by Grid.
 };
 
 
@@ -297,7 +297,7 @@ class Area: public svg::Identity
 {
   std::set<Hex*>  _hexes;
 public:
-  int                    size(void) const { return int(_hexes.size()); }
+  size_t                 size(void) const { return _hexes.size(); }
   bool                   contains(Hex* h) const { return _hexes.count(h)>0; }
   Boundary               boundary(void) const;
   const std::set<Hex*>&  hexes(void) const { return _hexes; }
@@ -326,7 +326,7 @@ class Path: public svg::Identity
 public:
   Area                    to_area(void) const;
   const std::list<Hex*>&  hexes(void) const { return _hexes; }
-  int                     length(void) const; ///< in units of I
+  size_t                  length(void) const; ///< in units of I
   std::string             steps(void) const;
   std::string             str(void) const;
 public: // construction
@@ -346,13 +346,13 @@ class Boundary: public svg::Identity
 {
   std::list<Edge*>  _edges;
 public:
-  int                      length(void) const; ///< in units of K
+  size_t                   length(void) const; ///< in units of K
   bool                     is_closed(void) const; ///< has no endpoints
   bool                     is_container(void) const; ///< contains finite area
   Boundary                 complement(void) const throw(hex::out_of_range);
   const std::list<Edge*>&  edges(void) const { return _edges; }
   Path                     to_path(void) const;
-  int                      path_length(void) const; ///< == to_path().length()
+  size_t                   path_length(void) const; ///< == to_path().length()
   bool                     clockwise(void) const; ///< normally false.
   std::string              str(void) const;
   /** Calculate the set of points required to draw this boundary. */
@@ -403,7 +403,7 @@ public: // construction
 
 /** Translates coordinates i,j in direction d. */
 void
-go(int& i, int& j, Direction d, int distance=1);
+go(int& i, int& j, Direction d, size_t distance=1);
 
 
 /** Translates coordinates i,j along steps. */
@@ -418,7 +418,7 @@ steps(const Hex* from, const Hex* to);
 
 
 /** The length of the shortest path between two hexes. */
-int
+size_t
 distance(const Hex* from, const Hex* to);
 
 
@@ -426,7 +426,7 @@ distance(const Hex* from, const Hex* to);
  *  The result may NOT be a valid Area, since it may be cut into several
  *  pieces by the edge of the grid. */
 std::set<Hex*>
-range(Hex* h, int distance);
+range(Hex* h, size_t distance);
 
 
 /** The set difference between a and b. */

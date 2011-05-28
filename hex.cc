@@ -46,7 +46,7 @@ Hex::edge(const Direction& d)
 const Edge*
 Hex::edge(const Direction& d) const
 {
-  return const_cast<Edge*>( const_cast<Hex*>(this)->edge( d ) );
+  return const_cast<Hex*>(this)->edge( d );
 }
 
 
