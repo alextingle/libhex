@@ -900,9 +900,11 @@ HEX.Boundary.prototype = {
       var queue =[];
       for(var e=0, len=this.edges.length; e<len; ++e)
       {
-        queue.insert(  this.edges[e].hex );
-        beyond.insert( this.edges[e].hex.go( this.edges[e].direction ) );
+        queue.push(  this.edges[e].hex );
+        beyond.push( this.edges[e].hex.go( this.edges[e].direction ) );
       }
+      HEX.uniq(beyond);
+      HEX.uniq(queue);
       return HEX.fill(beyond,queue);
     }
 
@@ -1090,7 +1092,8 @@ HEX.uniq = function(hex_array)
   var curr =-1;
   for(var i=0, len=hex_array.length; i<len; ++i)
   {
-    if(curr.valueOf() === hex_array[i].valueOf())
+    if(hex_array[i]===null || hex_array[i]===undefined ||
+        curr.valueOf() === hex_array[i].valueOf())
     {
       delete hex_array[i];
       --new_length;
@@ -1242,7 +1245,7 @@ HEX.fill = function(beyond, a)
     var h = queue.shift();
     for(var d=0; d<HEX.DIRECTIONS.length; ++d)
     {
-      var hd =h.go( HEX.add(HEX.A+d) );
+      var hd =h.go( HEX.add(HEX.A,d) );
       if(!HEX.set_contains(beyond,hd) && !HEX.set_contains(result,hd))
       {
         HEX.set_insert(queue,hd);
