@@ -33,7 +33,9 @@ DEBUG := 1
 VERSION_MAJOR := 0
 VERSION_MINOR := 1
 
-SOURCES := \
+OBJDIR := OBJ
+
+CCFILES := \
  algorithm.cc \
  area.cc \
  boundary.cc \
@@ -45,6 +47,11 @@ SOURCES := \
  move.cc \
  path.cc \
  svg.cc \
+
+OFILES   := $(addprefix $(OBJDIR)/,$(CCFILES:.cc=.o))
+DEPFILES := $(addprefix $(OBJDIR)/,$(CCFILES:.cc=.dep))
+
+OBJDIRS := $(sort $(dir $(OFILES) $(DEPFILES)))
 
 ifeq ($(DEBUG),1)
   CXXFLAGS += -g
@@ -77,30 +84,41 @@ endif
 .PHONY: all
 all: lib solib pylib test
 
-deps.mk: $(wildcard *.cc) $(wildcard *.h)
-	g++ $(CPPFLAGS) -MM $(wildcard *.cc) > $@
+.SUFFIXES:
 
-include deps.mk
+$(OBJDIR)/%.dep: %.cc | $(dir $(OBJDIR)/%)
+	g++ -MM $(CPPFLAGS) $< -o $@ -MT $@
+
+$(OBJDIR)/%.o: %.cc $(OBJDIR)/%.dep | $(dir $(OBJDIR)/%)
+	g++ -c  $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+
+ifneq "$(MAKECMDGOALS)" "clean"
+  -include $(DEPFILES)
+endif
+
+# Make object directories
+$(OBJDIRS):
+	mkdir -p $@
 
 hex_wrap.cc: hex.i $(wildcard *.h)
 	swig -o $@ -classic -c++ -python $<
 
 .PHONY: lib
 lib: libhex.a
-libhex.a: $(patsubst %.cc,%.o,$(SOURCES))
+libhex.a: $(OFILES)
 	ar rus $@ $^
 
 .PHONY: solib
 solib: libhex$(SOEXT)
-libhex$(SOEXT): $(patsubst %.cc,%.o,$(SOURCES))
+libhex$(SOEXT): $(OFILES)
 	$(call MakeSharedLib,$^,$@)
 
 .PHONY: pylib
 pylib: _hex.so
-_hex.so: hex_wrap.o $(patsubst %.cc,%.o,$(SOURCES))
+_hex.so: $(OBJDIR)/hex_wrap.o $(OFILES)
 	$(call MakeSharedLib,$^ $(LIBS),$@)
 
-test: test.o libhex$(SOEXT)
+test: $(OBJDIR)/test.o libhex$(SOEXT)
 	g++ $(LDFLAGS) $< $(LIBS) -o $@ -L. -lhex
 
 .PHONY: install
@@ -110,4 +128,4 @@ install: libhex$(SOEXT)
 
 .PHONY: clean
 clean:
-	rm -f *.o *$(SOEXT) *.a test hex_wrap.cc hex.py *.pyc
+	rm -rf $(OBJDIR) *$(SOEXT) *.a test hex_wrap.cc hex.py *.pyc
