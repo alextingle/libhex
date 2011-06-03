@@ -133,7 +133,7 @@ range(Hex* h, size_t distance)
     for(int d=0; d<DIRECTIONS; ++d)
     {
       Direction direction =C+d;
-      for(int count=0; count<distance; ++count)
+      for(size_t count=0; count<distance; ++count)
           try {
             go(i,j,direction); // in/out: i,j
             result.insert( grid.hex(i,j) );
