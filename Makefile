@@ -33,7 +33,7 @@ DEBUG := 1
 VERSION_MAJOR := 0
 VERSION_MINOR := 1
 
-OBJDIR := OBJ
+OBJDIR := $(BUILDDIR)OBJ
 
 CCFILES := \
  algorithm.cc \
@@ -56,7 +56,7 @@ OBJDIRS := $(sort $(dir $(OFILES) $(DEPFILES)))
 ifeq ($(DEBUG),1)
   CXXFLAGS += -g
 else
-  CXXFLAGS += -O3
+  CXXFLAGS += -O2
 endif
 
 LDFLAGS  += $(CXXFLAGS)
@@ -84,12 +84,10 @@ endif
 .PHONY: all
 all: lib solib pylib test
 
-.SUFFIXES:
-
 $(OBJDIR)/%.dep: %.cc | $(dir $(OBJDIR)/%)
 	g++ -MM $(CPPFLAGS) $< -o $@ -MT $@
 
-$(OBJDIR)/%.o: %.cc $(OBJDIR)/%.dep | $(dir $(OBJDIR)/%)
+$(OBJDIR)/%.o: %.cc $(OBJDIR)/%.dep
 	g++ -c  $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 ifneq "$(MAKECMDGOALS)" "clean"
@@ -129,3 +127,10 @@ install: libhex$(SOEXT)
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR) *$(SOEXT) *.a test hex_wrap.cc hex.py *.pyc
+
+# Eliminate all default rules.
+.SUFFIXES:
+
+# Don't leave half-finished targets lying around.
+.DELETE_ON_ERROR:
+
