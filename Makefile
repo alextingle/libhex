@@ -82,7 +82,7 @@ endif
 
 
 .PHONY: all
-all: lib solib pylib test
+all: lib solib pylib test README
 
 $(OBJDIR)/%.dep: %.cc | $(dir $(OBJDIR)/%)
 	g++ -MM $(CPPFLAGS) $< -o $@ -MT $@
@@ -127,6 +127,10 @@ install: libhex$(SOEXT)
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR) *$(SOEXT) *.a test hex_wrap.cc hex.py *.pyc
+
+README: hex.h
+	sed -n -e '/\/\*\* *@mainpage/,/\*\//p' $< \
+	| sed -e 's%^[/* ]*\(@mainpage \)\?%%' > $@
 
 # Eliminate all default rules.
 .SUFFIXES:
